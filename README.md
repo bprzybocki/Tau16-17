@@ -1,3 +1,6 @@
+# The Tau Manifesto (5628)
+This incudes all code needed for the robot controller. For our team code specifically, go here: https://github.com/taus5628/Tau16-17/tree/master/TeamCode/src/main/java/org/firstinspires/ftc/teamcode
+
 # ftc_app
 FTC Android Studio project to create FTC Robot Controller app.
 
