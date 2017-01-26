@@ -15,7 +15,7 @@ import com.qualcomm.robotcore.hardware.LightSensor;
  */
 
 @Autonomous(name="Tau: Auto Cap", group="Tau")
-//@Disabled
+@Disabled
 public class Auto extends LinearOpMode {
 
     Hardware robot = new Hardware();

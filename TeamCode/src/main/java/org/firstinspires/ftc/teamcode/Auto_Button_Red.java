@@ -33,7 +33,7 @@ import com.qualcomm.robotcore.hardware.I2cDeviceSynchImpl;
 
 @Autonomous(name = "Tau: Button Red", group = "Tau")
 // @Autonomous(...) is the other common choice
-//@Disabled
+@Disabled
 public class Auto_Button_Red extends LinearOpMode {
     /* Declare OpMode members. */
     private ElapsedTime runtime = new ElapsedTime();

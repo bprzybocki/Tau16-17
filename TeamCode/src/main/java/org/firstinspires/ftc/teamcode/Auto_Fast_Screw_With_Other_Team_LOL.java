@@ -4,13 +4,14 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 /**
  * Created by Benjamin on 10/19/2016.
  */
 
 @Autonomous(name="Tau: Auto Fast (Screw With Other Team LOL)", group="Tau")
-//@Disabled
+@Disabled
 public class Auto_Fast_Screw_With_Other_Team_LOL extends LinearOpMode {
 
     Hardware robot = new Hardware();

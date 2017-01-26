@@ -34,7 +34,8 @@ public class Hardware {
     //public static final double PISTON_UP = 0.83;
     public static final double PISTON_UP    = 0.2;
     public static final double PISTON_DOWN  = 1;
-    public static final double FLYWHEEL_PWR = -0.45;
+    public static final double FLYWHEEL_PWR = -0.6;
+    public static final double FLYWHEEL_TELE = -0.5;
     public static final int FLYWHEEL_SPD    = 4000;
     public static final int COLOR_THRESHOLD = 96; //needs testing
 
@@ -91,8 +92,8 @@ public class Hardware {
         //buttonSensorL.enableLed(true);
         //buttonSensorR.enableLed(true);
         // Just to check and make sure that it is not an encoder problem
-        intakeMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        //intakeMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        //intakeMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        intakeMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         flywheelMotorL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         flywheelMotorR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);

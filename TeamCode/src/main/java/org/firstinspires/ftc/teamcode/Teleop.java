@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.Hardware;
 
-/**5-
+/**
  * Created by Benjamin on 10/5/2016.
  */
 
@@ -29,6 +29,7 @@ public class Teleop extends OpMode {
     boolean isRightStopped = true;
     boolean flywheelOn = false;
 
+    // Controller layout
     //  Y
     // X  B
     //  A
@@ -137,16 +138,16 @@ public class Teleop extends OpMode {
             isRightStopped = false;
         }
 */
-        robot.leftFrontMotor.setPower(0.6*leftGP1);
-        robot.leftBackMotor.setPower(0.6*leftGP1);
-        robot.rightFrontMotor.setPower(0.6*rightGP1);
-        robot.rightBackMotor.setPower(0.6*rightGP1);
+        robot.leftFrontMotor.setPower(0.45*leftGP1);
+        robot.leftBackMotor.setPower(0.45*leftGP1);
+        robot.rightFrontMotor.setPower(0.45*rightGP1);
+        robot.rightBackMotor.setPower(0.45*rightGP1);
 
 
 
         if (gamepad2.b && !flywheelOn) {
-            robot.flywheelMotorR.setPower(robot.FLYWHEEL_PWR);
-            robot.flywheelMotorL.setPower(robot.FLYWHEEL_PWR);
+            robot.flywheelMotorR.setPower(robot.FLYWHEEL_TELE);
+            robot.flywheelMotorL.setPower(robot.FLYWHEEL_TELE);
             flywheelOn = true;
         }
         else if (gamepad2.b) {
@@ -157,8 +158,8 @@ public class Teleop extends OpMode {
         }
 
         if (gamepad2.right_trigger > 0.0) {
-            robot.flywheelMotorR.setPower(robot.FLYWHEEL_PWR);
-            robot.flywheelMotorL.setPower(robot.FLYWHEEL_PWR);
+            robot.flywheelMotorR.setPower(robot.FLYWHEEL_TELE);
+            robot.flywheelMotorL.setPower(robot.FLYWHEEL_TELE);
             flywheelOn = true;
 
         } else {

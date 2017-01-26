@@ -17,24 +17,19 @@ Support is available by emailing support@modernroboticsinc.com.
 */
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
-import com.qualcomm.robotcore.util.Range;
-import com.qualcomm.robotcore.hardware.LightSensor;
 import com.qualcomm.robotcore.hardware.I2cAddr;
 import com.qualcomm.robotcore.hardware.I2cDevice;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynchImpl;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 
-@Autonomous(name = "Tau: Auto Shoot Move", group = "Tau")
+@Autonomous(name = "Tau: Auto Cap 20s", group = "Tau")
 // @Autonomous(...) is the other common choice
 //@Disabled
-public class Auto_Shoot_Move extends LinearOpMode {
+public class Auto_Cap_20s extends LinearOpMode {
 
     /* Declare OpMode members. */
     Hardware robot = new Hardware();
@@ -113,17 +108,10 @@ public class Auto_Shoot_Move extends LinearOpMode {
         //telemetry.addData("3 A", colorAreader.getI2cAddress().get8Bit());
         telemetry.addData("4 C", colorCreader.getI2cAddress().get8Bit());
         telemetry.update();
-        telemetry.addData("WARNING:", "Do not press stop!");
-        telemetry.update();
         //encoderDrive(0.5,(int)(8 / 3 * Math.PI ),0,2);
-        robot.flywheelMotorL.setPower(robot.FLYWHEEL_PWR + 0.1);
-        robot.flywheelMotorR.setPower(robot.FLYWHEEL_PWR + 0.1);
-        leftSetPower(-0.15);
-        rightSetPower(-0.35);
-        sleepTau(300);
-        leftSetPower(0);
-        rightSetPower(0);
-        sleepTau(7000);
+       /*robot.flywheelMotorL.setPower(robot.FLYWHEEL_PWR + 0.0);
+        robot.flywheelMotorR.setPower(robot.FLYWHEEL_PWR + 0.0);
+        sleepTau(4000);
 
         //sleepTau(550);
         //goStraightPower(0);
@@ -132,14 +120,16 @@ public class Auto_Shoot_Move extends LinearOpMode {
         sleepTau(550);
         robot.flyWheelPiston.setPosition(robot.PISTON_DOWN);
         robot.intakeMotor.setPower(0.5);
-        sleepTau(7000);
+        sleepTau(3750);
         robot.intakeMotor.setPower(0);
         robot.flyWheelPiston.setPosition(robot.PISTON_UP);
         sleepTau(550);
         robot.flyWheelPiston.setPosition(robot.PISTON_DOWN);
         robot.flywheelMotorL.setPower(0);
-        robot.flywheelMotorR.setPower(0);
-        sleepTau(10000);
+        robot.flywheelMotorR.setPower(0);*/
+        telemetry.addData("WARNING:", "Do not press stop!");
+        telemetry.update();
+        sleepTau(20000);
         leftSetPower(-0.15);
         rightSetPower(-0.35);
         sleepTau(1000);

@@ -37,16 +37,24 @@ import com.qualcomm.robotcore.hardware.I2cDeviceSynchImpl;
 public class Auto_Button_Blue extends LinearOpMode {
 
     /* Declare OpMode members. */
-    private ElapsedTime runtime = new ElapsedTime();
     Hardware robot = new Hardware();
+    private ElapsedTime runtime = new ElapsedTime();
 
-    byte[] colorAcache;
-    byte[] colorCcache;
+    static final double COUNTS_PER_MOTOR_REV  = 1440;
+    static final double DRIVE_GEAR_REDUCTION  = 1.0 / 3;
+    static final double WHEEL_DIAMETER_INCHES = 4.0;
+    static final double COUNTS_PER_INCH       = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
+    static final double DRIVE_SPEED           = 0.6;
+    static final double TURN_SPEED            = 0.5;
+    static final double ERROR  = 1.5;
 
-    I2cDevice colorA;
-    I2cDevice colorC;
-    I2cDeviceSynch colorAreader;
-    I2cDeviceSynch colorCreader;
+    static byte[] colorAcache;
+    static byte[] colorCcache;
+
+    static I2cDevice colorA;
+    static I2cDevice colorC;
+    static I2cDeviceSynch colorAreader;
+    static I2cDeviceSynch colorCreader;
 
     //TouchSensor touch;         //Instance of TouchSensor - for changing color sensor mode
 
@@ -58,7 +66,7 @@ public class Auto_Button_Blue extends LinearOpMode {
         robot.init(hardwareMap);
 
         telemetry.addData("Status", "Initialized");
-
+        telemetry.update();
         //the below lines set up the configuration file
         colorA = robot.buttonSensorL;
         colorC = robot.buttonSensorR;
@@ -69,31 +77,100 @@ public class Auto_Button_Blue extends LinearOpMode {
         colorAreader.engage();
         colorCreader.engage();
 
+        robot.leftFrontMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.leftBackMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.rightFrontMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.rightBackMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        robot.leftFrontMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        robot.leftBackMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        robot.rightFrontMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        robot.rightBackMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
         waitForStart(); //--------------------------------------------------------------------------
 
 
 
         if (LEDState) {
             colorAreader.write8(3, 0);    //Set the mode of the color sensor using LEDState
-            //colorCreader.write8(3, 0);    //Set the mode of the color sensor using LEDState
+            colorCreader.write8(3, 0);    //Set the mode of the color sensor using LEDState
         } else {
             colorAreader.write8(3, 1);    //Set the mode of the color sensor using LEDState
-            //colorCreader.write8(3, 1);    //Set the mode of the color sensor using LEDState
+            colorCreader.write8(3, 1);    //Set the mode of the color sensor using LEDState
         }
         //Active - For measuring reflected light. Cancels out ambient light
         //Passive - For measuring ambient light, eg. the FTC Color Beacon
-            while(runtime.milliseconds() < 10000.0) {
+            //while(runtime.milliseconds() < 10000.0) {
             colorAcache = colorAreader.read(0x04, 1);
             colorCcache = colorCreader.read(0x04, 1);
 
 
             //display values
-            telemetry.addData("1 #A", colorAcache[0] & 0xFF);
+            //telemetry.addData("1 #A", colorAcache[0] & 0xFF);
             telemetry.addData("2 #C", colorCcache[0] & 0xFF);
 
-            telemetry.addData("3 A", colorAreader.getI2cAddress().get8Bit());
-            telemetry.addData("4 A", colorCreader.getI2cAddress().get8Bit());
+
+            //telemetry.addData("3 A", colorAreader.getI2cAddress().get8Bit());
+            telemetry.addData("4 C", colorCreader.getI2cAddress().get8Bit());
+            telemetry.update();
+        //encoderDrive(0.5,(int)(8 / 3 * Math.PI ),0,2);
+        robot.flywheelMotorL.setPower(robot.FLYWHEEL_PWR + 0.0);
+        robot.flywheelMotorR.setPower(robot.FLYWHEEL_PWR + 0.0);
+        sleepTau(2750);
+
+        //sleepTau(550);
+        //goStraightPower(0);
+        //sleepTau(550);
+        robot.flyWheelPiston.setPosition(robot.PISTON_UP);
+        sleepTau(550);
+        robot.flyWheelPiston.setPosition(robot.PISTON_DOWN);
+        sleepTau(2250);
+        robot.flyWheelPiston.setPosition(robot.PISTON_UP);
+        sleepTau(550);
+        robot.flyWheelPiston.setPosition(robot.PISTON_DOWN);
+        robot.flywheelMotorL.setPower(0);
+        robot.flywheelMotorR.setPower(0);
+        sleepTau(500);
+        encoderDrive(0.5,(-20*ERROR),(-20*ERROR),6);
+
+
+        encoderDrive(0.5,15,-15,6);
+        //encoderDrive(0.25,3.14*4*ERROR,-3.14*4*ERROR,6);
+        encoderDrive(0.5,(-60 * ERROR), (-60 * ERROR), 6);
+        //encoderDrive(0.25,-3.14*12 * ERROR,12*3.14 * ERROR,6);
+        encoderDrive(0.5,-40,40,6);
+        /*robot.leftFrontMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.leftBackMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.rightFrontMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.rightBackMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.leftFrontMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.leftBackMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.rightFrontMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.rightBackMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);*/
+        encoderDrive(0.2,24*ERROR,24*ERROR,5);
+        //encoderDrive(0.1,(40*ERROR),(40*ERROR),6);
+        //goStraightPower(0.2);
+        //sleepTau(1600);
+        //goStraightPower(0);
+        encoderDrive(0.2,-3*ERROR,-3*ERROR,4);
+        colorCcache = colorCreader.read(0x04, 1);
+        if((colorCcache[0] & 0xFF) == 9 || (colorCcache[0] & 0xFF)==10 ||(colorCcache[0] & 0xFF)==11 )
+        {
+            sleepTau(5200);
+            encoderDrive(0.2, 6*ERROR,6*ERROR,5);
+            /*sleepTau(6000);
+            goStraightPower(-0.5);
+            sleepTau(200);
+            goStraightPower(0.1);
+            sleepTau(3000);
+            goStraightPower(0);*/
+
         }
+        //encoderDrive(0.5,(int)(-16*ERROR),(int)(-16*ERROR),6);
+        //rightSetPower(0.1);
+        //sleepTau(1000);
+        //rightSetPower(0);
+        //}
         /*
 
         //SHOOT AND MOVE ---------------------------------------------------------------------------
@@ -155,12 +232,12 @@ public class Auto_Button_Blue extends LinearOpMode {
 
     public int getLeftPosition()
     {
-        return (robot.leftFrontMotor.getCurrentPosition() + robot.leftBackMotor.getCurrentPosition()) / 2;
+        return robot.leftBackMotor.getCurrentPosition();
     }
 
     public int getRightPosition()
     {
-        return (robot.rightFrontMotor.getCurrentPosition() + robot.rightBackMotor.getCurrentPosition()) / 2;
+        return robot.rightBackMotor.getCurrentPosition();
     }
 
     public void leftSetPower(double power)
@@ -179,5 +256,78 @@ public class Auto_Button_Blue extends LinearOpMode {
         rightSetPower(power);
         leftSetPower(power);
     }
+    public void encoderDrive(double speed,
+                             double
+                                     leftInches, double rightInches,
+                             double timeoutS) throws InterruptedException {
+        int newLeftTarget;
+        int newRightTarget;
+
+        // Ensure that the opmode is still active
+        if (opModeIsActive()) {
+
+
+
+
+
+
+            // Determine new target position, and pass to motor controller
+            newLeftTarget = getLeftPosition() + (int) (leftInches * COUNTS_PER_INCH);
+            newRightTarget = getRightPosition() + (int) (rightInches * COUNTS_PER_INCH);
+            robot.leftFrontMotor.setTargetPosition(newLeftTarget);
+            robot.leftBackMotor.setTargetPosition(newLeftTarget);
+            robot.rightFrontMotor.setTargetPosition( newRightTarget);
+            robot.rightBackMotor.setTargetPosition(  newRightTarget);
+
+
+            // Turn On RUN_TO_POSITION
+            robot.leftFrontMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            robot.leftBackMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            robot.rightFrontMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            robot.rightBackMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            // reset the timeout time and start motion.
+            runtime.reset();
+            robot.leftFrontMotor.setPower(Math.abs(speed));
+            robot.leftBackMotor.setPower(Math.abs(speed));
+            robot.rightFrontMotor.setPower(-1 * Math.abs(speed));
+            robot.rightBackMotor.setPower( -1 * Math.abs(speed));
+
+            //rightSetPower(-1 * Math.abs(speed));
+            // keep looping while we are still active, and there is time left, and both motors are running.
+            while (opModeIsActive() &&
+                    (runtime.seconds() < timeoutS) &&
+                    (robot.leftFrontMotor.isBusy() && robot.leftBackMotor.isBusy() &&
+                            robot.rightFrontMotor.isBusy() && robot.rightBackMotor.isBusy())
+                    && Math.abs(robot.leftFrontMotor.getCurrentPosition()) < Math.abs(newLeftTarget) &&
+                    Math.abs(robot.rightFrontMotor.getCurrentPosition()) < Math.abs(newRightTarget)) {
+
+                // Allow time for other processes to run.
+                idle();
+            }
+
+            // Stop all motion;
+            robot.leftFrontMotor.setPower(0);
+            robot.leftBackMotor.setPower(0);
+
+            robot.rightFrontMotor.setPower(0);
+            robot.rightBackMotor.setPower(0);
+
+            // Turn off RUN_TO_POSITION
+            robot.leftFrontMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            robot.leftBackMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            robot.rightFrontMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            robot.rightBackMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+            robot.leftFrontMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            robot.leftBackMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            robot.rightFrontMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            robot.rightBackMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+            //  sleep(250);   // optional pause after each move
+            sleepTau(250);
+        }
+    }
+
 }
 
