@@ -28,6 +28,7 @@ public class Teleop extends OpMode {
     boolean isLeftStopped = true;
     boolean isRightStopped = true;
     boolean flywheelOn = false;
+    double currentRPM = 0;
 
     // Controller layout
     //  Y
@@ -99,6 +100,7 @@ public class Teleop extends OpMode {
         //telemetry.addData("RPM R",robot.flywheelMotorR.getMaxSpeed());
 */
         telemetry.addData("Intake", robot.intakeMotor.getCurrentPosition());
+        telemetry.addData("CurrentRPM", currentRPM);
         telemetry.addData("Flywheel L", robot.flywheelMotorL.getMaxSpeed());
         telemetry.addData("Flywheel R", robot.flywheelMotorR.getMaxSpeed());
 
@@ -146,8 +148,7 @@ public class Teleop extends OpMode {
 
 
         if (gamepad2.b && !flywheelOn) {
-            robot.flywheelMotorR.setPower(robot.FLYWHEEL_TELE);
-            robot.flywheelMotorL.setPower(robot.FLYWHEEL_TELE);
+            currentRPM = robot.setPID(robot.FLYWHEEL_TELE, currentRPM);
             flywheelOn = true;
         }
         else if (gamepad2.b) {
@@ -158,8 +159,8 @@ public class Teleop extends OpMode {
         }
 
         if (gamepad2.right_trigger > 0.0) {
-            robot.flywheelMotorR.setPower(robot.FLYWHEEL_TELE);
             robot.flywheelMotorL.setPower(robot.FLYWHEEL_TELE);
+            robot.flywheelMotorR.setPower(robot.FLYWHEEL_TELE);
             flywheelOn = true;
 
         } else {

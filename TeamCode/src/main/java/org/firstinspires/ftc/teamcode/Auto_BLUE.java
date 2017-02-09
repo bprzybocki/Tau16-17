@@ -1,26 +1,14 @@
 package org.firstinspires.ftc.teamcode;
 
-/*
-Modern Robotics Color Sensors Example with color number
-Created 9/29/2016 by Colton Mehlhoff of Modern Robotics using FTC SDK 2.2
-Reuse permitted with credit where credit is due
-
-Configuration:
-I2CDevice "ca" (MRI Color Sensor with I2C address 0x3a (0x1d 7-bit)
-I2CDevice "cc" (MRI Color Sensor with default I2C address 0x3c (0x1e 7-bit)
-
-ModernRoboticsI2cColorSensor class is not being used because it can not access color number.
-ColorSensor class is not being used because it can not access color number.
-
-To change color sensor I2C Addresses, go to http://modernroboticsedu.com/mod/lesson/view.php?id=96
-Support is available by emailing support@modernroboticsinc.com.
-*/
-
+/**
+ * Created by BobChuckyJoe on 1/30/2017.
+ */
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.util.Range;
@@ -29,15 +17,12 @@ import com.qualcomm.robotcore.hardware.I2cAddr;
 import com.qualcomm.robotcore.hardware.I2cDevice;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynchImpl;
-
-
-@Autonomous(name = "Tau: Auto Shoot Move", group = "Tau")
-// @Autonomous(...) is the other common choice
-//@Disabled
-public class Auto_Shoot_Move extends LinearOpMode {
-
+/*
+@Autonomous(name = "Tau: DERP", group = "Tau")
+@Disabled
+public class Auto_BLUE extends LinearOpMode{
     /* Declare OpMode members. */
-    Hardware robot = new Hardware();
+/*    Hardware robot = new Hardware();
     private ElapsedTime runtime = new ElapsedTime();
 
     static final double COUNTS_PER_MOTOR_REV  = 1440;
@@ -51,6 +36,12 @@ public class Auto_Shoot_Move extends LinearOpMode {
     static byte[] colorAcache;
     static byte[] colorCcache;
 
+    /*int zAccumulated;  //Total rotation left/right
+    int heading;       //Heading left/right. Integer between 0 and 359
+    int xVal, yVal, zVal;  //Momentary rate of rotation in three axis
+    */
+
+/*
     static I2cDevice colorA;
     static I2cDevice colorC;
     static I2cDeviceSynch colorAreader;
@@ -63,12 +54,19 @@ public class Auto_Shoot_Move extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        robot.init(hardwareMap);
+        //robot.init(hardwareMap);
+        int zAccumulated;  //Total rotation left/right
+        int heading;       //Heading left/right. Integer between 0 and 359
+        int xVal, yVal, zVal;  //Momentary rate of rotation in three axis
+
+        GyroSensor sensorGyro;  //General Gyro Sensor allows us to point to the sensor in the configuration file.
+        ModernRoboticsI2cGyro mrGyro;  //ModernRoboticsI2cGyro allows us to .getIntegratedZValue()
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
-        //the below lines set up the configuration file
-        colorA = robot.buttonSensorL;
+
+
+        /*colorA = robot.buttonSensorL;
         colorC = robot.buttonSensorR;
 
         colorAreader = new I2cDeviceSynchImpl(colorA, I2cAddr.create8bit(0x4c), false);
@@ -76,119 +74,159 @@ public class Auto_Shoot_Move extends LinearOpMode {
 
         colorAreader.engage();
         colorCreader.engage();
+        *//*
+        sensorGyro = hardwareMap.gyroSensor.get("gyro");  //Point to the gyro in the configuration file
+        mrGyro = (ModernRoboticsI2cGyro)sensorGyro;
+        //ModernRoboticsI2cGyro allows us to .getIntegratedZValue()
+        mrGyro.calibrate();
+        waitForStart();
 
-        robot.leftFrontMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.leftBackMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.rightFrontMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.rightBackMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        FlywheelsOn();
+        DriveStraightAbsolute(1.0,1.0,0);       //Speed of FULL POWER(1.0), One tile forward
+        Shoot();
+        Shoot();
+        //0 is forward, negative degrees is Clockwise, positive is COUNTERCLOCKWISE
+        TurnToAbsolute(0.8,-45);
 
-        robot.leftFrontMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        robot.leftBackMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        robot.rightFrontMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        robot.rightBackMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        DriveStraightAbsolute(1.0,2.1,-45);  //Drive halfway
 
-        waitForStart(); //--------------------------------------------------------------------------
+        TurnToAbsolute(0.2,-45); //Readjust midway
 
+        DriveStraight(1.0,2.1);
 
+        TurnToAbsolute(0.4,-90);
 
-        if (LEDState) {
-            colorAreader.write8(3, 0);    //Set the mode of the color sensor using LEDState
-            colorCreader.write8(3, 0);    //Set the mode of the color sensor using LEDState
-        } else {
-            colorAreader.write8(3, 1);    //Set the mode of the color sensor using LEDState
-            colorCreader.write8(3, 1);    //Set the mode of the color sensor using LEDState
-        }
-        //Active - For measuring reflected light. Cancels out ambient light
-        //Passive - For measuring ambient light, eg. the FTC Color Beacon
-        //while(runtime.milliseconds() < 10000.0) {
-        colorAcache = colorAreader.read(0x04, 1);
-        colorCcache = colorCreader.read(0x04, 1);
+        DriveStraightUntilProximity(0.5,0.5);    //Drive UNTIL 0.5 tiles to wall
 
+        TurnToAbsolute(0.4,0);
 
-        //display values
-        //telemetry.addData("1 #A", colorAcache[0] & 0xFF);
-        telemetry.addData("2 #C", colorCcache[0] & 0xFF);
+        DriveStraightUntilLine(1.0);
 
+        DriveStraightBackwardsUntilLine(0.3);
 
-        //telemetry.addData("3 A", colorAreader.getI2cAddress().get8Bit());
-        telemetry.addData("4 C", colorCreader.getI2cAddress().get8Bit());
-        telemetry.update();
-        telemetry.addData("WARNING:", "Do not press stop!");
-        telemetry.update();
-        //encoderDrive(0.5,(int)(8 / 3 * Math.PI ),0,2);
-        robot.flywheelMotorL.setPower(robot.FLYWHEEL_PWR + 0.1);
-        robot.flywheelMotorR.setPower(robot.FLYWHEEL_PWR + 0.1);
-        leftSetPower(-0.15);
-        rightSetPower(-0.35);
-        sleepTau(300);
-        leftSetPower(0);
-        rightSetPower(0);
-        sleepTau(7000);
+        TurnToAbsolute(0.3,-90);
 
-        //sleepTau(550);
-        //goStraightPower(0);
-        //sleepTau(550);
-        robot.flyWheelPiston.setPosition(robot.PISTON_UP);
-        sleepTau(550);
-        robot.flyWheelPiston.setPosition(robot.PISTON_DOWN);
-        robot.intakeMotor.setPower(0.5);
-        sleepTau(7000);
-        robot.intakeMotor.setPower(0);
-        robot.flyWheelPiston.setPosition(robot.PISTON_UP);
-        sleepTau(550);
-        robot.flyWheelPiston.setPosition(robot.PISTON_DOWN);
-        robot.flywheelMotorL.setPower(0);
-        robot.flywheelMotorR.setPower(0);
-        sleepTau(10000);
-        leftSetPower(-0.15);
-        rightSetPower(-0.35);
-        sleepTau(10000);
-        leftSetPower(0);
-        rightSetPower(0);
-        //encoderDrive(0.5,(int)(-16*ERROR),(int)(-16*ERROR),6);
-        //rightSetPower(0.1);
-        //sleepTau(1000);
-        //rightSetPower(0);
-        //}
-        /*
+        DriveStraightUntilProximity(0.5,0.25);
 
-        //SHOOT AND MOVE ---------------------------------------------------------------------------
-        moveForwardAndShoot();
-
-        //MOVE TO BUTTON 1 -------------------------------------------------------------------------
-        moveToButton1();;
-        /*
-        if ((colorAcache[0] & 0xFF) == 2 || (colorAcache[0] & 0xFF) == 3 || (colorAcache[0] & 0xFF) == 4) {
-            robot.buttonMotor.setPower(-0.1);
-            sleepTau(300);
-            robot.buttonMotor.setPower(0.1);
-            sleepTau(300);
-        }
-        else
+        for(int i = 0; i < 2; i++)
         {
-            goStraightPower(-0.1);
+            DriveStraightUntilProximity(0.2,0.0);
+            DriveStraightBackwards(0.1, 1/12);
+            if(colorIs(BLUE)) {
+                break;
+            }
+            sleepTau(5000);
+        }
 
-        }*/
+        TurnToAbsolute(0.5,0);
 
+        DriveUntilLine(1.0);
+
+        TurnToAbsolute(0.5,-90);
+
+        for(int i = 0; i < 2; i++)
+        {
+            DriveStraightUntilProximity(0.2,0.0);
+            DriveStraightBackwards(0.1, 1/12);
+            if(colorIs(BLUE)) {
+                break;
+            }
+            sleepTau(5000);
+        }
+
+        ParkMid();
+
+        //Park middle later
+
+
+
+
+
+
+
+
+
+
+
+        telemetry.addData("Status","Calibrating");
+        telemetry.update();
+        while(mrGyro.isCalibrating())
+        {
+
+        }
+        telemetry.addData("Status","Done Calibrating");
+        telemetry.update();
+        sleepTau(5000);
+        mrGyro.setHeadingMode(ModernRoboticsI2cGyro.HeadingMode.HEADING_CARTESIAN);
+        while(opModeIsActive()) {
+
+
+            telemetry.addData("Status", "Running: " + runtime.toString());
+
+            zAccumulated = mrGyro.getIntegratedZValue();  //Set variables to gyro readings
+            heading = mrGyro.getHeading();
+            /*heading = 360 - mrGyro.getHeading();  //Reverse direction of heading to match the integrated value
+            if (heading == 360) {
+                heading = 0;
+            }
+*//*
+            xVal = mrGyro.rawX() / 128;  //Lowest 7 bits is noise
+            yVal = mrGyro.rawY() / 128;
+            zVal = mrGyro.rawZ() / 128;
+
+            telemetry.addData("1. heading", String.format("%03d", heading));  //Display variables to Driver Station Screen
+            telemetry.addData("2. accu", String.format("%03d", zAccumulated));
+            telemetry.addData("3. X", String.format("%03d", xVal));
+            telemetry.addData("4. Y", String.format("%03d", yVal));
+            telemetry.addData("5. Z", String.format("%03d", zVal));
+            telemetry.update();
+            waitOneFullHardwareCycle();
+        }
     }
 
-    public void moveToButton1(){
+    //
+    // DriveStraightAbsolute() - move the robot forward for the given number
+    //                           of tiles at the given speed. The "straightness"
+    //                           is based upon the given heading (negative CW
+    //                           and positive CCW).
+    //
+    public void DriveStraightAbsolute(float speed, float tiles, int targetHeading)
+    {
+        robot.leftFrontMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.rightFrontMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.leftFrontMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        robot.rightFrontMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
+        int target_count = (int)(tiles*6000);
+        int error;
+        float ERROR_ADJUSTMENT = 0.2f;
+
+        while (robot.leftFrontMotor.getCurrentPosition() < target_count) {
+            error = targetHeading - getHeading(); //positive error means need to go counterclockwise
+            robot.leftFrontMotor.setPower(speed - error*ERROR_ADJUSTMENT);
+            robot.rightFrontMotor.setPower(speed + error*ERROR_ADJUSTMENT);
+        }
+        robot.leftFrontMotor.setPower(0);
+        robot.rightFrontMotor.setPower(0);
     }
 
-    public  void moveToButton2From1(){
-
+    //
+    // getHeading() - Read the gyro, and convert the heading to our heading where 0 is forward,
+    //                negative is clockwise, and positive is counterclockwise.
+    //
+    public int getHeading() {
+        int heading = robot.mrGyro.getHeading();
+        if (heading < 180)
+            return -heading;
+        else
+            return 360 - heading;
     }
-
 
     public void moveForwardAndShoot()
     {
         robot.flywheelMotorL.setPower(robot.FLYWHEEL_PWR);
         robot.flywheelMotorR.setPower(robot.FLYWHEEL_PWR);
-        goStraightPower(-0.5);
-        sleepTau(550);
-        goStraightPower(0);
-        sleepTau(550);
+        goStraightPower(-0.5,550);
         robot.flyWheelPiston.setPosition(robot.PISTON_UP);
         sleepTau(550);
         robot.flyWheelPiston.setPosition(robot.PISTON_DOWN);
@@ -219,37 +257,39 @@ public class Auto_Shoot_Move extends LinearOpMode {
         return robot.rightBackMotor.getCurrentPosition();
     }
 
-    public void leftSetPower(double power)
+    public void leftSetPower(double power, long mili)
     {
         robot.leftFrontMotor.setPower(power);
         robot.leftBackMotor.setPower(power);
+        sleepTau(mili);
+        robot.leftBackMotor.setPower(0);
+        robot.leftFrontMotor.setPower(0);
     }
 
-    public void rightSetPower(double power)
+    public void rightSetPower(double power, long mili)
     {
         robot.rightFrontMotor.setPower(power);
         robot.rightBackMotor.setPower(power);
+        sleepTau(mili);
+
+        robot.rightFrontMotor.setPower(0);
+        robot.rightBackMotor.setPower(0);
     }
-    public void goStraightPower(double power)
+    public void goStraightPower(double power, long mili)
     {
-        rightSetPower(power);
-        leftSetPower(power);
+        rightSetPower(power,mili);
+        leftSetPower(power,mili);
+
     }
+
     public void encoderDrive(double speed,
-                             double
-                                     leftInches, double rightInches,
+                             double leftInches, double rightInches,
                              double timeoutS) throws InterruptedException {
         int newLeftTarget;
         int newRightTarget;
 
         // Ensure that the opmode is still active
         if (opModeIsActive()) {
-
-
-
-
-
-
             // Determine new target position, and pass to motor controller
             newLeftTarget = getLeftPosition() + (int) (leftInches * COUNTS_PER_INCH);
             newRightTarget = getRightPosition() + (int) (rightInches * COUNTS_PER_INCH);
@@ -307,6 +347,4 @@ public class Auto_Shoot_Move extends LinearOpMode {
             sleepTau(250);
         }
     }
-
-}
-
+}*/

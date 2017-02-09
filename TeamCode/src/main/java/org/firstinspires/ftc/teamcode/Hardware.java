@@ -6,6 +6,7 @@ import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.I2cDevice;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -27,6 +28,9 @@ public class Hardware {
 
     public Servo flyWheelPiston    = null;
 
+    public GyroSensor sensorGyro  = null;  //Point to the gyro in the configuration file
+    public ModernRoboticsI2cGyro mrGyro = null;
+
     //public ModernRoboticsI2cGyro gyro = null;
     public I2cDevice buttonSensorR = null;
     public I2cDevice buttonSensorL = null;
@@ -35,9 +39,12 @@ public class Hardware {
     public static final double PISTON_UP    = 0.2;
     public static final double PISTON_DOWN  = 1;
     public static final double FLYWHEEL_PWR = -0.6;
-    public static final double FLYWHEEL_TELE = -0.5;
+    public static final double FLYWHEEL_TELE = 0.2;
     public static final int FLYWHEEL_SPD    = 4000;
     public static final int COLOR_THRESHOLD = 96; //needs testing
+    public static final double kP = 1; //0.03
+    public static final double kI = 0; //1.3
+    public static final double kD = 0; //0.33
 
     HardwareMap hwMap = null;
     private ElapsedTime period = new ElapsedTime();
@@ -64,6 +71,9 @@ public class Hardware {
 
         buttonSensorL = hwMap.i2cDevice.get("sens_l");
         buttonSensorR = hwMap.i2cDevice.get("sens_r");
+
+        sensorGyro = hwMap.gyroSensor.get("gyro");  //Point to the gyro in the configuration file
+        mrGyro = (ModernRoboticsI2cGyro)sensorGyro;
 
         leftFrontMotor.setDirection(DcMotor.Direction.REVERSE); // Set to REVERSE if using AndyMark motors
         leftBackMotor.setDirection(DcMotor.Direction.REVERSE); // Set to REVERSE if using AndyMark motors
@@ -124,5 +134,25 @@ public class Hardware {
 
         // Reset the cycle clock for the next pass.
         period.reset();
+    }
+    public double setPID(double target, double previous) {
+        /*double current = flywheelMotorR.getPower();
+        double error = current - target;
+        double powerSet = kP*error+kI*(error - target) + kD*((current - previous)/10);
+        //flywheelMotorL.setPower(powerSet);
+        flywheelMotorR.setPower(target - powerSet);
+        sleepTau(10);*/
+        flywheelMotorR.setPower(FLYWHEEL_TELE);
+        flywheelMotorL.setPower(FLYWHEEL_TELE);
+
+        return 0;
+    }
+    public void sleepTau(long millis)
+    {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

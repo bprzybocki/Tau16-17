@@ -114,8 +114,8 @@ public class Auto_Button_Blue extends LinearOpMode {
             telemetry.addData("4 C", colorCreader.getI2cAddress().get8Bit());
             telemetry.update();
         //encoderDrive(0.5,(int)(8 / 3 * Math.PI ),0,2);
-        robot.flywheelMotorL.setPower(robot.FLYWHEEL_PWR + 0.0);
-        robot.flywheelMotorR.setPower(robot.FLYWHEEL_PWR + 0.0);
+        robot.flywheelMotorL.setPower(robot.FLYWHEEL_TELE);
+        robot.flywheelMotorR.setPower(robot.FLYWHEEL_TELE);
         sleepTau(2750);
 
         //sleepTau(550);
