@@ -140,11 +140,8 @@ public class Teleop extends OpMode {
             isRightStopped = false;
         }
 */
-        robot.leftFrontMotor.setPower(0.45*leftGP1);
-        robot.leftBackMotor.setPower(0.45*leftGP1);
-        robot.rightFrontMotor.setPower(0.45*rightGP1);
-        robot.rightBackMotor.setPower(0.45*rightGP1);
-
+        robot.leftMotor.setPower(0.45*leftGP1);
+        robot.rightMotor.setPower(0.45*rightGP1);
 
 
         if (gamepad2.b && !flywheelOn) {

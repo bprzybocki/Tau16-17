@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-import android.graphics.Color;
-
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -11,16 +9,14 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.I2cDevice;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
 /**
- * Created by Benjamin on 10/5/2016.
+ * Created by BobChuckyJoe on 1/25/2017.
  */
 public class Hardware {
 
-    public DcMotor leftFrontMotor  = null;
-    public DcMotor leftBackMotor   = null;
-    public DcMotor rightFrontMotor = null;
-    public DcMotor rightBackMotor  = null;
+    public DcMotor leftMotor   = null;
+    public DcMotor rightMotor = null;
+
     public DcMotor buttonMotor     = null;
     public DcMotor intakeMotor     = null;
     public DcMotor flywheelMotorR  = null;
@@ -28,7 +24,7 @@ public class Hardware {
 
     public Servo flyWheelPiston    = null;
 
-    public GyroSensor sensorGyro  = null;  //Point to the gyro in the configuration file
+    public GyroSensor sensorGyro   = null;
     public ModernRoboticsI2cGyro mrGyro = null;
 
     //public ModernRoboticsI2cGyro gyro = null;
@@ -38,13 +34,9 @@ public class Hardware {
     //public static final double PISTON_UP = 0.83;
     public static final double PISTON_UP    = 0.2;
     public static final double PISTON_DOWN  = 1;
-    public static final double FLYWHEEL_PWR = -0.6;
-    public static final double FLYWHEEL_TELE = 0.2;
+    public static final double FLYWHEEL_PWR = -0.45;
     public static final int FLYWHEEL_SPD    = 4000;
     public static final int COLOR_THRESHOLD = 96; //needs testing
-    public static final double kP = 1; //0.03
-    public static final double kI = 0; //1.3
-    public static final double kD = 0; //0.33
 
     HardwareMap hwMap = null;
     private ElapsedTime period = new ElapsedTime();
@@ -57,10 +49,9 @@ public class Hardware {
         this.hwMap = hwMap;
 
         // Define and Initialize Motors
-        leftFrontMotor  = hwMap.dcMotor.get("left_front");
-        leftBackMotor   = hwMap.dcMotor.get("left_back");
-        rightFrontMotor = hwMap.dcMotor.get("right_front");
-        rightBackMotor  = hwMap.dcMotor.get("right_back");
+
+        leftMotor   = hwMap.dcMotor.get("left");
+        rightMotor = hwMap.dcMotor.get("right");
         buttonMotor     = hwMap.dcMotor.get("button");
         intakeMotor     = hwMap.dcMotor.get("intake");
         flywheelMotorL  = hwMap.dcMotor.get("flywheel_l");
@@ -75,35 +66,35 @@ public class Hardware {
         sensorGyro = hwMap.gyroSensor.get("gyro");  //Point to the gyro in the configuration file
         mrGyro = (ModernRoboticsI2cGyro)sensorGyro;
 
-        leftFrontMotor.setDirection(DcMotor.Direction.REVERSE); // Set to REVERSE if using AndyMark motors
-        leftBackMotor.setDirection(DcMotor.Direction.REVERSE); // Set to REVERSE if using AndyMark motors
-        rightFrontMotor.setDirection(DcMotor.Direction.FORWARD); // Set to FORWARD if using AndyMark motors
-        rightBackMotor.setDirection(DcMotor.Direction.FORWARD); // Set to FORWARD if using AndyMark motors
+
+        // Set to REVERSE if using AndyMark motors
+        leftMotor.setDirection(DcMotor.Direction.REVERSE); // Set to REVERSE if using AndyMark motors
+        rightMotor.setDirection(DcMotor.Direction.FORWARD); // Set to FORWARD if using AndyMark motors
+        // Set to FORWARD if using AndyMark motors
         buttonMotor.setDirection(DcMotor.Direction.FORWARD);
         intakeMotor.setDirection(DcMotor.Direction.FORWARD);
         flywheelMotorR.setDirection(DcMotorSimple.Direction.FORWARD);
         flywheelMotorL.setDirection(DcMotorSimple.Direction.REVERSE);
 
         // Set all motors to zero power
-        leftFrontMotor.setPower(0);
-        leftBackMotor.setPower(0);
-        rightFrontMotor.setPower(0);
-        rightBackMotor.setPower(0);
+
+        leftMotor.setPower(0);
+        rightMotor.setPower(0);
+
         buttonMotor.setPower(0);
         intakeMotor.setPower(0);
         flywheelMotorL.setPower(0);
         flywheelMotorR.setPower(0);
         // May want to use RUN_USING_ENCODERS if encoders are installed.
-        leftFrontMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        leftBackMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rightFrontMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rightBackMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         //buttonMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         //buttonSensorL.enableLed(true);
         //buttonSensorR.enableLed(true);
         // Just to check and make sure that it is not an encoder problem
-        //intakeMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        intakeMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        intakeMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        //intakeMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         flywheelMotorL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         flywheelMotorR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -134,18 +125,6 @@ public class Hardware {
 
         // Reset the cycle clock for the next pass.
         period.reset();
-    }
-    public double setPID(double target, double previous) {
-        /*double current = flywheelMotorR.getPower();
-        double error = current - target;
-        double powerSet = kP*error+kI*(error - target) + kD*((current - previous)/10);
-        //flywheelMotorL.setPower(powerSet);
-        flywheelMotorR.setPower(target - powerSet);
-        sleepTau(10);*/
-        flywheelMotorR.setPower(FLYWHEEL_TELE);
-        flywheelMotorL.setPower(FLYWHEEL_TELE);
-
-        return 0;
     }
     public void sleepTau(long millis)
     {

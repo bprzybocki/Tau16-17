@@ -38,15 +38,13 @@ public class Auto_Test extends LinearOpMode {
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
+        telemetry.addData("Debug", robot.leftBackMotor.getCurrentPosition());
+        telemetry.update();
+
         waitForStart();
 
-        robot.rightFrontMotor.setPower(0.5);
-        robot.leftFrontMotor.setPower(0.5);
-        robot.sleepTau(5000);
-
-        robot.rightFrontMotor.setPower(0);
-        robot.leftFrontMotor.setPower(0);
-        robot.sleepTau(1000);
+        telemetry.addData("Debug", "Running");
+        telemetry.update();
 
         DriveStraightAbsolute(0.25,5.0,0);
     }
@@ -59,27 +57,39 @@ public class Auto_Test extends LinearOpMode {
     //
     public void DriveStraightAbsolute(double speed, double tiles, int targetHeading)
     {
-        robot.leftFrontMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.rightFrontMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.leftFrontMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        robot.rightFrontMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        robot.leftBackMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.rightBackMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.leftBackMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        robot.rightBackMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        int target_count = (int)(tiles*6000);
-        int error;
-        double ERROR_ADJUSTMENT = 0.2;
+        int TICKS_PER_TILE = 600;           // number of encoder ticks per tile
+        double ERROR_ADJUSTMENT = 0.02;     // motor power adjustment per degree off of straight
+        int LEFT_POLARITY = -1;     // encoder for the REV motors goes negative when moving forward
+                                    //    may need to set to 1 for a different motor/encoder to keep
+                                    //    the encoder values always positive for a forward move
 
-        while (robot.leftFrontMotor.getCurrentPosition() < target_count) {
-            error = targetHeading - getHeading(); //positive error means need to go counterclockwise
-            robot.leftFrontMotor.setPower(speed - error*ERROR_ADJUSTMENT);
-            robot.rightFrontMotor.setPower(speed + error*ERROR_ADJUSTMENT);
+        int target_count = (int)(tiles*TICKS_PER_TILE);
+
+        telemetry.addData("Debug", "Entering loop");
+        telemetry.update();
+
+        telemetry.addData("Left Ticks", robot.leftBackMotor.getCurrentPosition());
+        telemetry.update();
+
+        while (robot.leftBackMotor.getCurrentPosition()*LEFT_POLARITY < target_count) {
+            int error = targetHeading - getHeading(); //positive error means need to go counterclockwise
+            robot.leftBackMotor.setPower(speed - error*ERROR_ADJUSTMENT);
+            robot.rightBackMotor.setPower(speed + error*ERROR_ADJUSTMENT);
             telemetry.addData("Gyro Heading Raw", robot.mrGyro.getHeading());
             telemetry.addData("Gyro Error", error);
-            telemetry.addData("Left Ticks", robot.leftFrontMotor.getCurrentPosition());
-            telemetry.addData("Right Ticks", robot.rightFrontMotor.getCurrentPosition());
+            telemetry.addData("Left Ticks", robot.leftBackMotor.getCurrentPosition());
+            telemetry.addData("Right Ticks", robot.rightBackMotor.getCurrentPosition());
             telemetry.update();
         }
-        robot.leftFrontMotor.setPower(0);
-        robot.rightFrontMotor.setPower(0);
+        telemetry.addData("Debug", "Exiting loop");
+        telemetry.update();
+        robot.leftBackMotor.setPower(0);
+        robot.rightBackMotor.setPower(0);
     }
 
     //
