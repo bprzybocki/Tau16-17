@@ -143,23 +143,9 @@ public class Teleop extends OpMode {
         robot.leftMotor.setPower(0.45*leftGP1);
         robot.rightMotor.setPower(0.45*rightGP1);
 
-
-        if (gamepad2.b && !flywheelOn) {
-            currentRPM = robot.setPID(robot.FLYWHEEL_TELE, currentRPM);
-            flywheelOn = true;
-        }
-        else if (gamepad2.b) {
-            robot.flywheelMotorR.setPower(0.0);
-            robot.flywheelMotorL.setPower(0.0);
-            flywheelOn = false;
-            flywheelOn = false;
-        }
-
         if (gamepad2.right_trigger > 0.0) {
-            robot.flywheelMotorL.setPower(robot.FLYWHEEL_TELE);
-            robot.flywheelMotorR.setPower(robot.FLYWHEEL_TELE);
-            flywheelOn = true;
-
+            robot.flywheelMotorL.setPower(robot.FLYWHEEL_PWR);
+            robot.flywheelMotorR.setPower(robot.FLYWHEEL_PWR);
         } else {
             robot.flywheelMotorR.setPower(0.0);
             robot.flywheelMotorL.setPower(0.0);
