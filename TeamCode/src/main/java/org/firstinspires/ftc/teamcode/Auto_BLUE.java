@@ -18,8 +18,7 @@ import com.qualcomm.robotcore.hardware.I2cDevice;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynchImpl;
 
-@Autonomous(name = "Tau: DERP", group = "Tau")
-
+@Autonomous(name = "Tau: Auto Blue", group = "Tau")
 public class Auto_BLUE extends LinearOpMode{
     /* Declare OpMode members. */
     Hardware robot = new Hardware();
@@ -35,6 +34,8 @@ public class Auto_BLUE extends LinearOpMode{
 
     static byte[] colorAcache;
     static byte[] colorCcache;
+
+    static byte[] range1Cache;
 
     /*int zAccumulated;  //Total rotation left/right
     int heading;       //Heading left/right. Integer between 0 and 359
@@ -81,45 +82,69 @@ public class Auto_BLUE extends LinearOpMode{
         */
         robot.mrGyro.setHeadingMode(ModernRoboticsI2cGyro.HeadingMode.HEADING_CARTESIAN);
         //ModernRoboticsI2cGyro allows us to .getIntegratedZValue()
-        robot.mrGyro.calibrate();
         waitForStart();
 
-        FlywheelsOn();
-        DriveStraightAbsolute(1.0,1.0);       //Speed of FULL POWER(1.0), One tile forward
-        Shoot();
-        Shoot();
+        //FlywheelsOn();
+        /*
+        //CODE TO KEEP!!!
+        DriveStraightAbsolute(0.25,0.5,0);       //Speed of FULL POWER(1.0), One tile forward
+        //Shoot();
+        //Shoot();
+        //FlywheelsOff();
         //0 is forward, negative degrees is Clockwise, positive is COUNTERCLOCKWISE
-        TurnToAbsolute(0.8,-45);
+        sleepTau(1000);
 
-        DriveStraightAbsolute(1.0,2.1);  //Drive halfway
+        TurnToAbsolute(-30);
 
-        TurnToAbsolute(0.2,-45); //Readjust midway
+        sleepTau(500);
 
-        DriveStraightAbsolute(1.0,2.1);
+        DriveStraightAbsolute(0.25,3.0,-30);  //Drive halfway
 
-        TurnToAbsolute(0.4,-90);
+        sleepTau(500);
 
-        DriveStraightUntilProximity(0.5,0.5);    //Drive UNTIL 0.5 tiles to wall
+        TurnToAbsolute(-90);
+        */
+        //PART TWO OF CODE!!!
 
-        TurnToAbsolute(0.4,0);
+        //THROWAWAY CODE
+        TurnToAbsolute(-90);
 
-        DriveStraightUntilLine(1.0);
+        sleepTau(250);
 
-        DriveStraightBackwardsUntilLine(0.3);
+        telemetry.addData("Debug", getHeading());
 
-        TurnToAbsolute(0.3,-90);
+        DriveStraightUntilProximity(0.25,-90,35,10000);    //Drive UNTIL 0.5 tiles to wall
 
-        DriveStraightUntilProximity(0.5,0.25);
+        sleepTau(250);
+
+        telemetry.addData("Debug", getHeading());
+
+        TurnToAbsolute(0);
+
+        sleepTau(250);
+
+        DriveStraightUntilLine(0.35,0);
+
+        sleepTau(250);
+
+        DriveStraightBackwards(0.25, 0.15, 0);
+
+        sleepTau(250);
+
+        TurnToAbsolute(-90);
+
+        sleepTau(250);
 
         for(int i = 0; i < 2; i++)
         {
-            DriveStraightUntilProximity(0.2,0.0);
-            DriveStraightBackwards(0.1, 1/12);
-            if(colorIs(BLUE)) {
+            DriveStraightAbsolute(0.25,0.2,-90);
+            DriveStraightUntilProximity(0.25,-90,35,3000);
+            if(colorIs(robot.BLUE)) {
                 break;
             }
             sleepTau(5000);
         }
+        /*
         DriveStraightBackwards(0.5, 0.5);
 
         TurnToAbsolute(0.5,0);
@@ -132,64 +157,13 @@ public class Auto_BLUE extends LinearOpMode{
         {
             DriveStraightUntilProximity(0.2,0.0);
             DriveStraightBackwards(0.1, 1/12);
-            if(colorIs(BLUE)) {
+            if(colorIs(robot.BLUE)) {
                 break;
             }
             sleepTau(5000);
         }
 
-        ParkMid();
-
-        //Park middle later
-
-
-/*
-
-
-        if (LEDState) {
-            colorAreader.write8(3, 0);    //Set the mode of the color sensor using LEDState
-            colorCreader.write8(3, 0);    //Set the mode of the color sensor using LEDState
-        } else {
-            colorAreader.write8(3, 1);    //Set the mode of the color sensor using LEDState
-            colorCreader.write8(3, 1);    //Set the mode of the color sensor using LEDState
-        }
-        //Active - For measuring reflected light. Cancels out ambient light
-        //Passive - For measuring ambient light, eg. the FTC Color Beacon
-        //while(runtime.milliseconds() < 10000.0) {
-        colorAcache = colorAreader.read(0x04, 1);
-        colorCcache = colorCreader.read(0x04, 1);
-
-
-
-        //display values
-        //telemetry.addData("1 #A", colorAcache[0] & 0xFF);
-        telemetry.addData("2 #C", colorCcache[0] & 0xFF);
-
-
-        //telemetry.addData("3 A", colorAreader.getI2cAddress().get8Bit());
-        telemetry.addData("4 C", colorCreader.getI2cAddress().get8Bit());
-        telemetry.update();
-        goStraightPower(0.5,1000);
-        sleepTau(1000);
-        leftSetPower(0.1,500);
-
-
-        //SHOOT AND MOVE ---------------------------------------------------------------------------
-        moveForwardAndShoot();
-        //MOVE TO BUTTON 1 -------------------------------------------------------------------------
-        moveToButton1();
-        /*
-        if ((colorAcache[0] & 0xFF) == 2 || (colorAcache[0] & 0xFF) == 3 || (colorAcache[0] & 0xFF) == 4) {
-            robot.buttonMotor.setPower(-0.1);
-            sleepTau(300);
-            robot.buttonMotor.setPower(0.1);
-            sleepTau(300);
-        }
-        else
-        {
-            goStraightPower(-0.1);
-        }*/
-
+        ParkMid();*/
     }
 
     //
@@ -202,11 +176,11 @@ public class Auto_BLUE extends LinearOpMode{
     {
         robot.leftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot.rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.leftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        robot.rightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        robot.leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        int TICKS_PER_TILE = 600;           // number of encoder ticks per tile
-        double ERROR_ADJUSTMENT = 0.02;     // motor power adjustment per degree off of straight
+        int TICKS_PER_TILE = 1900;           // number of encoder ticks per tile
+        double ERROR_ADJUSTMENT = 0.035;     // motor power adjustment per degree off of straight
         int LEFT_POLARITY = -1;     // encoder for the REV motors goes negative when moving forward
         //    may need to set to 1 for a different motor/encoder to keep
         //    the encoder values always positive for a forward move
@@ -221,8 +195,8 @@ public class Auto_BLUE extends LinearOpMode{
 
         while (robot.leftMotor.getCurrentPosition()*LEFT_POLARITY < target_count) {
             int error = targetHeading - getHeading(); //positive error means need to go counterclockwise
-            robot.leftMotor.setPower(speed - error*ERROR_ADJUSTMENT);
-            robot.rightMotor.setPower(speed + error*ERROR_ADJUSTMENT);
+            robot.leftMotor.setPower(Math.max(speed - error*ERROR_ADJUSTMENT, 0)); //don't go below 0
+            robot.rightMotor.setPower(Math.min(speed + error*ERROR_ADJUSTMENT, 1)); //don't go above 1
             telemetry.addData("Gyro Heading Raw", robot.mrGyro.getHeading());
             telemetry.addData("Gyro Error", error);
             telemetry.addData("Left Ticks", robot.leftMotor.getCurrentPosition());
@@ -249,51 +223,35 @@ public class Auto_BLUE extends LinearOpMode{
 
     //This function turns a number of degrees compared to where the robot is. Positive numbers trn left.
     public void turn(int target) throws InterruptedException {
-        turnAbsolute(target + robot.mrGyro.getIntegratedZValue());
+        TurnToAbsolute(target + robot.mrGyro.getIntegratedZValue());
     }
 
 
-    public void turnAbsolute(int target) {
-        zAccumulated = robot.mrGyro.getIntegratedZValue();  //Set variables to gyro readings
-        double turnSpeed = 0.7;
+    public void TurnToAbsolute(int target) {
+        int heading = getHeading();  //Set variables to gyro readings
+        //double SPD_ADJUSTMENT = 0.006;
+        int diff = Math.abs(heading - target);
+        int THRESHOLD = 14;
 
-        while (Math.abs(zAccumulated - target) > 3 && opModeIsActive()) {  //Continue while the robot direction is further than three degrees from the target
-            if (zAccumulated > target) {  //if gyro is positive, we will turn right
-                robot.leftMotor.setPower(turnSpeed);
-                robot.rightMotor.setPower(-turnSpeed);
+        while (diff > THRESHOLD && opModeIsActive()) {  //Continue while the robot direction is further than three degrees from the target
+            if (heading > target) {  //if gyro is positive, we will turn right
+                robot.leftMotor.setPower(0.4);
+                robot.rightMotor.setPower(-0.4); //clockwise (slower, needs higher power)
             }
 
-            if (zAccumulated < target) {  //if gyro is positive, we will turn left
-                robot.leftMotor.setPower(-turnSpeed);
-                robot.rightMotor.setPower(turnSpeed);
+            if (heading < target) {  //if gyro is positive, we will turn left
+                robot.leftMotor.setPower(-0.4); //counterclockwise
+                robot.rightMotor.setPower(0.4);
             }
 
-            zAccumulated = robot.mrGyro.getIntegratedZValue();  //Set variables to gyro readings
-            telemetry.addData("accu", String.format("%03d", zAccumulated));
+            heading = getHeading();  //Set variables to gyro readings
+            telemetry.addData("heading", String.format("%03d", heading));
             telemetry.update();
+            diff = Math.abs(heading - target);
         }
 
         robot.leftMotor.setPower(0);  //Stop the motors
         robot.rightMotor.setPower(0);
-
-    }
-
-
-    public void moveForwardAndShoot()
-    {
-        robot.flywheelMotorL.setPower(robot.FLYWHEEL_PWR);
-        robot.flywheelMotorR.setPower(robot.FLYWHEEL_PWR);
-        goStraightPower(-0.5,550);
-        robot.flyWheelPiston.setPosition(robot.PISTON_UP);
-        sleepTau(550);
-        robot.flyWheelPiston.setPosition(robot.PISTON_DOWN);
-        sleepTau(1000);
-        robot.flyWheelPiston.setPosition(robot.PISTON_UP);
-        sleepTau(550);
-        robot.flyWheelPiston.setPosition(robot.PISTON_DOWN);
-        robot.flywheelMotorL.setPower(0);
-        robot.flywheelMotorR.setPower(0);
-
     }
     public void sleepTau(long millis)
     {
@@ -303,17 +261,6 @@ public class Auto_BLUE extends LinearOpMode{
             e.printStackTrace();
         }
     }
-
-    public int getLeftPosition()
-    {
-        return robot.leftMotor.getCurrentPosition();
-    }
-
-    public int getRightPosition()
-    {
-        return robot.rightMotor.getCurrentPosition();
-    }
-
     public void leftSetPower(double power, long mili)
     {
         robot.leftMotor.setPower(power);
@@ -328,82 +275,159 @@ public class Auto_BLUE extends LinearOpMode{
 
         robot.rightMotor.setPower(0);
     }
-    public void goStraightPower(double power, long mili)
+    public void FlywheelsOn()
     {
-        rightSetPower(power,mili);
-        leftSetPower(power,mili);
-
+        robot.flywheelMotorL.setPower(robot.FLYWHEEL_PWR);
+        robot.flywheelMotorL.setPower(robot.FLYWHEEL_PWR);
     }
-    /*public void encoderDrive(double speed,
-                             double leftInches, double rightInches,
-                             double timeoutS) throws InterruptedException {
-        int newLeftTarget;
-        int newRightTarget;
+    public void FlywheelsOff()
+    {
+        robot.flywheelMotorL.setPower(0);
+        robot.flywheelMotorL.setPower(0);
+    }
 
-        // Ensure that the opmode is still active
-        if (opModeIsActive()) {
-
-
-
-
-
-
-            // Determine new target position, and pass to motor controller
-            newLeftTarget = getLeftPosition() + (int) (leftInches * COUNTS_PER_INCH);
-            newRightTarget = getRightPosition() + (int) (rightInches * COUNTS_PER_INCH);
-            robot.leftFrontMotor.setTargetPosition(newLeftTarget);
-            robot.leftBackMotor.setTargetPosition(newLeftTarget);
-            robot.rightFrontMotor.setTargetPosition( newRightTarget);
-            robot.rightBackMotor.setTargetPosition(  newRightTarget);
+    public void Shoot()
+    {
+        robot.sleepTau(3000);
+        robot.flyWheelPiston.setPosition(robot.PISTON_UP);
+        robot.sleepTau(500);
+        robot.flyWheelPiston.setPosition(robot.PISTON_DOWN);
+    }
 
 
-            // Turn On RUN_TO_POSITION
-            robot.leftFrontMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            robot.leftBackMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            robot.rightFrontMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            robot.rightBackMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-            // reset the timeout time and start motion.
-            runtime.reset();
-            robot.leftFrontMotor.setPower(Math.abs(speed));
-            robot.leftBackMotor.setPower(Math.abs(speed));
-            robot.rightFrontMotor.setPower(-1 * Math.abs(speed));
-            robot.rightBackMotor.setPower( -1 * Math.abs(speed));
+    public int getBeaconColor(){
+        colorAcache = robot.colorAreader.read(0x04, 1);
+        return colorAcache[0] & 0xFF;
+    }
+    public int getGroundColor(){
+        colorCcache = robot.colorCreader.read(0x04,1);
+        return colorCcache[0] & 0xFF;
+    }
 
-            //rightSetPower(-1 * Math.abs(speed));
-            // keep looping while we are still active, and there is time left, and both motors are running.
-            while (opModeIsActive() &&
-                    (runtime.seconds() < timeoutS) &&
-                    (robot.leftFrontMotor.isBusy() && robot.leftBackMotor.isBusy() &&
-                            robot.rightFrontMotor.isBusy() && robot.rightBackMotor.isBusy())
-                    && Math.abs(robot.leftFrontMotor.getCurrentPosition()) < Math.abs(newLeftTarget) &&
-                    Math.abs(robot.rightFrontMotor.getCurrentPosition()) < Math.abs(newRightTarget)) {
+    public void DriveStraightUntilLine(double speed, int targetHeading) {
+        robot.leftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-                // Allow time for other processes to run.
-                idle();
-            }
+        boolean foundLine = false;
+        double ERROR_ADJUSTMENT = 0.035;     // motor power adjustment per degree off of straight
+        int LEFT_POLARITY = -1;     // encoder for the REV motors goes negative when moving forward
+        //    may need to set to 1 for a different motor/encoder to keep
+        //    the encoder values always positive for a forward move
 
-            // Stop all motion;
-            robot.leftFrontMotor.setPower(0);
-            robot.leftBackMotor.setPower(0);
+        telemetry.addData("Debug", "Entering loop");
+        telemetry.update();
 
-            robot.rightFrontMotor.setPower(0);
-            robot.rightBackMotor.setPower(0);
+        telemetry.addData("Left Ticks", robot.leftMotor.getCurrentPosition());
+        telemetry.update();
 
-            // Turn off RUN_TO_POSITION
-            robot.leftFrontMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            robot.leftBackMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            robot.rightFrontMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            robot.rightBackMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        while (!foundLine) {
+            int error = targetHeading - getHeading(); //positive error means need to go counterclockwise
+            robot.leftMotor.setPower(Math.max(speed - error*ERROR_ADJUSTMENT, 0)); //don't go below 0
+            robot.rightMotor.setPower(Math.min(speed + error*ERROR_ADJUSTMENT, 1)); //don't go above 1
 
-            robot.leftFrontMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            robot.leftBackMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            robot.rightFrontMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            robot.rightBackMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-            //  sleep(250);   // optional pause after each move
-            sleepTau(250);
+            if (getGroundColor() > 13)
+                foundLine = true;
+            telemetry.addData("Gyro Heading Raw", robot.mrGyro.getHeading());
+            telemetry.addData("Gyro Error", error);
+            telemetry.addData("Left Ticks", robot.leftMotor.getCurrentPosition());
+            telemetry.addData("Right Ticks", robot.rightMotor.getCurrentPosition());
+            telemetry.update();
         }
+        telemetry.addData("Debug", "Exiting loop");
+        telemetry.update();
+        robot.leftMotor.setPower(0);
+        robot.rightMotor.setPower(0);
     }
-*/
+
+    public void DriveStraightBackwards(double speed, double tiles, int targetHeading)
+    {
+        robot.leftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        int TICKS_PER_TILE = 1900;           // number of encoder ticks per tile
+        double ERROR_ADJUSTMENT = 0.035;     // motor power adjustment per degree off of straight
+        int LEFT_POLARITY = 1;     // encoder for the REV motors goes negative when moving forward
+        //    may need to set to 1 for a different motor/encoder to keep
+        //    the encoder values always positive for a forward move
+
+        int target_count = (int)(tiles*TICKS_PER_TILE);
+
+        telemetry.addData("Debug", "Entering loop");
+        telemetry.update();
+
+        telemetry.addData("Left Ticks", robot.leftMotor.getCurrentPosition());
+        telemetry.update();
+
+        while (robot.leftMotor.getCurrentPosition()*LEFT_POLARITY < target_count) {
+            int error = targetHeading - getHeading(); //positive error means need to go counterclockwise
+            robot.leftMotor.setPower(-1*Math.min(speed + error*ERROR_ADJUSTMENT, 1)); //don't go below 0
+            robot.rightMotor.setPower(-1*Math.max(speed - error*ERROR_ADJUSTMENT, 0)); //don't go above 1
+            telemetry.addData("Gyro Heading Raw", robot.mrGyro.getHeading());
+            telemetry.addData("Gyro Error", error);
+            telemetry.addData("Left Ticks", robot.leftMotor.getCurrentPosition());
+            telemetry.addData("Right Ticks", robot.rightMotor.getCurrentPosition());
+            telemetry.update();
+        }
+        telemetry.addData("Debug", "Exiting loop");
+        telemetry.update();
+        robot.leftMotor.setPower(0);
+        robot.rightMotor.setPower(0);
+    }
+    public void DriveStraightUntilProximity(double speed, int targetHeading, int distance, long timeoutMiliseconds){
+
+        robot.leftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        int TICKS_PER_TILE = 1900;           // number of encoder ticks per tile
+        double ERROR_ADJUSTMENT = 0.035;     // motor power adjustment per degree off of straight
+        int LEFT_POLARITY = -1;     // encoder for the REV motors goes negative when moving forward
+        //    may need to set to 1 for a different motor/encoder to keep
+        //    the encoder values always positive for a forward move
+
+
+        telemetry.addData("Debug", "Entering loop");
+        telemetry.update();
+
+        telemetry.addData("Left Ticks", robot.leftMotor.getCurrentPosition());
+        telemetry.update();
+        double startTime = runtime.milliseconds();
+
+        while (getUltrasonicDistance() > distance && runtime.milliseconds() - startTime < timeoutMiliseconds) {
+            int error = targetHeading - getHeading(); //positive error means need to go counterclockwise
+            robot.leftMotor.setPower(Math.max(speed - error*ERROR_ADJUSTMENT, 0)); //don't go below 0
+            robot.rightMotor.setPower(Math.min(speed + error*ERROR_ADJUSTMENT, 1)); //don't go above 1
+            telemetry.addData("Gyro Heading Raw", robot.mrGyro.getHeading());
+            telemetry.addData("Gyro Error", error);
+            telemetry.addData("Left Ticks", robot.leftMotor.getCurrentPosition());
+            telemetry.addData("Right Ticks", robot.rightMotor.getCurrentPosition());
+            telemetry.update();
+        }
+        telemetry.addData("Debug", "Exiting loop");
+        telemetry.update();
+        robot.leftMotor.setPower(0);
+        robot.rightMotor.setPower(0);
+
+    }
+    public int getUltrasonicDistance(){
+        range1Cache = robot.RANGE1Reader.read(robot.RANGE1_REG_START, robot.RANGE1_READ_LENGTH);
+        return range1Cache[0] & 0xFF;
+    }
+    public int getODSDistance(){
+        range1Cache = robot.RANGE1Reader.read(robot.RANGE1_REG_START, robot.RANGE1_READ_LENGTH);
+        return range1Cache[1] & 0xFF;
+    }
+    public boolean colorIs(int color)
+    {
+        if (getBeaconColor() == color - 1 || getBeaconColor() == color || getBeaconColor() == color + 1)
+            return true;
+        else
+            return false;
+    }
 }

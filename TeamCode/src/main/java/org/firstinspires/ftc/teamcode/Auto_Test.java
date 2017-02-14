@@ -29,13 +29,16 @@ public class Auto_Test extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        telemetry.addData("Status", "Calibrating... Don't press start!");
         robot.init(hardwareMap);
-        robot.mrGyro.calibrate();
-        //while (robot.mrGyro.isCalibrating()) {}
-        robot.mrGyro.setHeadingMode(ModernRoboticsI2cGyro.HeadingMode.HEADING_CARTESIAN);
 
-        telemetry.addData("Status", "Initialized");
+        telemetry.addData("Status","Calibrating");
+        telemetry.update();
+        robot.mrGyro.calibrate();
+        while(robot.mrGyro.isCalibrating())
+        {
+
+        }
+        telemetry.addData("Status","Done Calibrating");
         telemetry.update();
 
         telemetry.addData("Debug", robot.leftMotor.getCurrentPosition());
@@ -46,7 +49,36 @@ public class Auto_Test extends LinearOpMode {
         telemetry.addData("Debug", "Running");
         telemetry.update();
 
-        DriveStraightAbsolute(0.25,5.0,0);
+        //DriveStraightAbsolute(0.25,5.0,0);
+        TurnToAbsolute(90);
+        robot.sleepTau(2500);
+        telemetry.addData("Gyro", getHeading());
+        telemetry.update();
+        robot.sleepTau(2500);
+        TurnToAbsolute(0);
+        robot.sleepTau(2500);
+        telemetry.addData("Gyro", getHeading());
+        telemetry.update();
+        robot.sleepTau(2500);
+        TurnToAbsolute(-90);
+        robot.sleepTau(2500);
+        telemetry.addData("Gyro", getHeading());
+        telemetry.update();
+        robot.sleepTau(2500);
+        TurnToAbsolute(-45);
+        robot.sleepTau(2500);
+        telemetry.addData("Gyro", getHeading());
+        telemetry.update();
+        robot.sleepTau(2500);
+        TurnToAbsolute(-90);
+        robot.sleepTau(2500);
+        telemetry.addData("Gyro", getHeading());
+        telemetry.update();
+        robot.sleepTau(2500);
+
+
+
+        boolean change = false;
     }
 
     //
@@ -59,11 +91,11 @@ public class Auto_Test extends LinearOpMode {
     {
         robot.leftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot.rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.leftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        robot.rightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        robot.leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        int TICKS_PER_TILE = 600;           // number of encoder ticks per tile
-        double ERROR_ADJUSTMENT = 0.02;     // motor power adjustment per degree off of straight
+        int TICKS_PER_TILE = 1900;           // number of encoder ticks per tile
+        double ERROR_ADJUSTMENT = 0.035;     // motor power adjustment per degree off of straight
         int LEFT_POLARITY = -1;     // encoder for the REV motors goes negative when moving forward
                                     //    may need to set to 1 for a different motor/encoder to keep
                                     //    the encoder values always positive for a forward move
@@ -78,8 +110,8 @@ public class Auto_Test extends LinearOpMode {
 
         while (robot.leftMotor.getCurrentPosition()*LEFT_POLARITY < target_count) {
             int error = targetHeading - getHeading(); //positive error means need to go counterclockwise
-            robot.leftMotor.setPower(speed - error*ERROR_ADJUSTMENT);
-            robot.rightMotor.setPower(speed + error*ERROR_ADJUSTMENT);
+            robot.leftMotor.setPower(Math.max(speed - error*ERROR_ADJUSTMENT, 0)); //don't go below 0
+            robot.rightMotor.setPower(Math.min(speed + error*ERROR_ADJUSTMENT, 1)); //don't go above 1
             telemetry.addData("Gyro Heading Raw", robot.mrGyro.getHeading());
             telemetry.addData("Gyro Error", error);
             telemetry.addData("Left Ticks", robot.leftMotor.getCurrentPosition());
@@ -99,8 +131,35 @@ public class Auto_Test extends LinearOpMode {
     public int getHeading() {
         int heading = robot.mrGyro.getHeading();
         if (heading < 180)
-            return heading;
+            return -heading;
         else
-            return -(360 - heading);
+            return 360 - heading;
+    }
+
+    public void TurnToAbsolute(int target) {
+        int heading = getHeading();  //Set variables to gyro readings
+        //double SPD_ADJUSTMENT = 0.006;
+        int diff = Math.abs(heading - target);
+        int THRESHOLD = 14;
+
+        while (diff > THRESHOLD && opModeIsActive()) {  //Continue while the robot direction is further than three degrees from the target
+            if (heading > target) {  //if gyro is positive, we will turn right
+                robot.leftMotor.setPower(0.4);
+                robot.rightMotor.setPower(-0.4); //clockwise (slower, needs higher power)
+            }
+
+            if (heading < target) {  //if gyro is positive, we will turn left
+                robot.leftMotor.setPower(-0.4); //counterclockwise
+                robot.rightMotor.setPower(0.4);
+            }
+
+            heading = getHeading();  //Set variables to gyro readings
+            telemetry.addData("heading", String.format("%03d", heading));
+            telemetry.update();
+            diff = Math.abs(heading - target);
+        }
+
+        robot.leftMotor.setPower(0);  //Stop the motors
+        robot.rightMotor.setPower(0);
     }
 }

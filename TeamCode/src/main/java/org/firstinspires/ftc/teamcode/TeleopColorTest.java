@@ -135,10 +135,10 @@ public class TeleopColorTest extends OpMode {
             isRightStopped = false;
         }
 */
-        robot.leftFrontMotor.setPower(0.4*leftGP1);
-        robot.leftBackMotor.setPower(0.4*leftGP1);
-        robot.rightFrontMotor.setPower(0.4*rightGP1);
-        robot.rightBackMotor.setPower(0.4*rightGP1);
+        robot.leftMotor.setPower(0.4*leftGP1);
+        robot.leftMotor.setPower(0.4*leftGP1);
+        robot.rightMotor.setPower(0.4*rightGP1);
+        robot.rightMotor.setPower(0.4*rightGP1);
 
 
 

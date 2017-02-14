@@ -1,4 +1,5 @@
 package org.firstinspires.ftc.teamcode;
+import android.graphics.Color;
 
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -9,8 +10,12 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.I2cDevice;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.hardware.I2cAddr;
+import com.qualcomm.robotcore.hardware.I2cDevice;
+import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
+import com.qualcomm.robotcore.hardware.I2cDeviceSynchImpl;
+import com.qualcomm.robotcore.util.ElapsedTime;
 /**
- * Created by BobChuckyJoe on 1/25/2017.
  */
 public class Hardware {
 
@@ -27,9 +32,23 @@ public class Hardware {
     public GyroSensor sensorGyro   = null;
     public ModernRoboticsI2cGyro mrGyro = null;
 
+    I2cAddr RANGE1ADDRESS = new I2cAddr(0x14); //Default I2C address for MR Range (7-bit)
+    public static final int RANGE1_REG_START = 0x04; //Register to start reading
+    public static final int RANGE1_READ_LENGTH = 2; //Number of byte to read
+
+    public I2cDevice RANGE1;
+    public I2cDeviceSynch RANGE1Reader;
+
+    public static I2cDevice colorA;
+    public static I2cDevice colorC;
+    public static I2cDeviceSynch colorAreader;
+    public static I2cDeviceSynch colorCreader;
+
+
+
     //public ModernRoboticsI2cGyro gyro = null;
-    public I2cDevice buttonSensorR = null;
-    public I2cDevice buttonSensorL = null;
+    public I2cDevice beaconSensor = null;
+    public I2cDevice groundSensor = null;
     //public static final double PISTON_DOWN = 0.33;
     //public static final double PISTON_UP = 0.83;
     public static final double PISTON_UP    = 0.2;
@@ -37,6 +56,7 @@ public class Hardware {
     public static final double FLYWHEEL_PWR = -0.45;
     public static final int FLYWHEEL_SPD    = 4000;
     public static final int COLOR_THRESHOLD = 96; //needs testing
+    public static final int BLUE = 3;
 
     HardwareMap hwMap = null;
     private ElapsedTime period = new ElapsedTime();
@@ -50,8 +70,8 @@ public class Hardware {
 
         // Define and Initialize Motors
 
-        leftMotor   = hwMap.dcMotor.get("left");
-        rightMotor = hwMap.dcMotor.get("right");
+        leftMotor   = hwMap.dcMotor.get("left_front"); ///CORRECT!
+        rightMotor = hwMap.dcMotor.get("right_front");
         buttonMotor     = hwMap.dcMotor.get("button");
         intakeMotor     = hwMap.dcMotor.get("intake");
         flywheelMotorL  = hwMap.dcMotor.get("flywheel_l");
@@ -60,11 +80,30 @@ public class Hardware {
         flywheelMotorL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         flywheelMotorR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
-        buttonSensorL = hwMap.i2cDevice.get("sens_l");
-        buttonSensorR = hwMap.i2cDevice.get("sens_r");
+        beaconSensor = hwMap.i2cDevice.get("beacon_sens");
+        groundSensor = hwMap.i2cDevice.get("ground_sens");
 
         sensorGyro = hwMap.gyroSensor.get("gyro");  //Point to the gyro in the configuration file
         mrGyro = (ModernRoboticsI2cGyro)sensorGyro;
+
+        RANGE1 = hwMap.i2cDevice.get("range");
+        RANGE1Reader = new I2cDeviceSynchImpl(RANGE1, RANGE1ADDRESS, false);
+        RANGE1Reader.engage();
+
+        colorA = beaconSensor;
+        colorC = groundSensor;
+
+        colorAreader = new I2cDeviceSynchImpl(colorA, I2cAddr.create8bit(0x3c), false);
+        colorCreader = new I2cDeviceSynchImpl(colorC, I2cAddr.create8bit(0x5c), false);
+
+
+        colorAreader.engage();
+        colorCreader.engage();
+
+        colorAreader.write8(3,1);
+        colorCreader.write8(3,0);
+
+
 
 
         // Set to REVERSE if using AndyMark motors

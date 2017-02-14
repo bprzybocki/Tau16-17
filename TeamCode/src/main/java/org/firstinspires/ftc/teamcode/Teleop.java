@@ -60,6 +60,9 @@ public class Teleop extends OpMode {
         robot.flywheelMotorL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         robot.flywheelMotorR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
+        robot.leftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        robot.rightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
         //robot.flywheelMotorL.setMaxSpeed(robot.FLYWHEEL_SPD);
         //robot.flywheelMotorL.setMaxSpeed(robot.FLYWHEEL_SPD);
     }
@@ -140,7 +143,7 @@ public class Teleop extends OpMode {
             isRightStopped = false;
         }
 */
-        robot.leftMotor.setPower(0.45*leftGP1);
+        robot.leftMotor.setPower(0.45*leftGP1); //0.45
         robot.rightMotor.setPower(0.45*rightGP1);
 
         if (gamepad2.right_trigger > 0.0) {
