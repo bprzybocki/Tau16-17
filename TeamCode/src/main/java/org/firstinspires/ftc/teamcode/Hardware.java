@@ -132,7 +132,7 @@ public class Hardware {
         //buttonSensorL.enableLed(true);
         //buttonSensorR.enableLed(true);
         // Just to check and make sure that it is not an encoder problem
-        intakeMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        intakeMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         //intakeMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         flywheelMotorL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);

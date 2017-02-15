@@ -3,23 +3,17 @@ package org.firstinspires.ftc.teamcode;
 /**
  * Created by BobChuckyJoe on 1/30/2017.
  */
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.ColorSensor;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.GyroSensor;
-import com.qualcomm.robotcore.util.ElapsedTime;
+
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
-import com.qualcomm.robotcore.util.Range;
-import com.qualcomm.robotcore.hardware.LightSensor;
-import com.qualcomm.robotcore.hardware.I2cAddr;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.I2cDevice;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
-import com.qualcomm.robotcore.hardware.I2cDeviceSynchImpl;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
-@Autonomous(name = "Tau: Auto Blue", group = "Tau")
-public class Auto_BLUE extends LinearOpMode{
+@Autonomous(name = "Tau: Auto Red", group = "Tau")
+public class Auto_RED extends LinearOpMode{
     /* Declare OpMode members. */
     Hardware robot = new Hardware();
     private ElapsedTime runtime = new ElapsedTime();
@@ -32,7 +26,6 @@ public class Auto_BLUE extends LinearOpMode{
     static final double TURN_SPEED            = 0.5;
     static final double ERROR  = 1.5;
     static final int INTERIM_TIME = 100;
-    static final double FAST_POWER = 0.5;
     static final double POWER = 0.4;
     static final double LINE_POWER = 0.25; // Slower because we don't want to miss line
 
@@ -98,26 +91,26 @@ public class Auto_BLUE extends LinearOpMode{
         //0 is forward, negative degrees is Clockwise, positive is COUNTERCLOCKWISE
         sleepTau(INTERIM_TIME);
 
-        TurnToAbsolute(-30);
+        TurnToAbsolute(30);
 
         sleepTau(INTERIM_TIME);
 
-        DriveStraightAbsolute(POWER,3.0,-30);  //Drive halfway
+        DriveStraightAbsolute(POWER,3.0,30);  //Drive halfway
 
         sleepTau(INTERIM_TIME);
 
-        TurnToAbsolute(-90);
+        TurnToAbsolute(90);
 
         //PART TWO OF CODE!!!
 
         //THROWAWAY CODE
-        //TurnToAbsolute(-90);
+        //TurnToAbsolute(90);
 
         sleepTau(INTERIM_TIME);
 
         telemetry.addData("Debug", getHeading());
 
-        DriveStraightUntilProximity(POWER,-90,35,10000);    //Drive UNTIL 0.5 tiles to wall
+        DriveStraightUntilProximity(POWER,90,35,10000);    //Drive UNTIL 0.5 tiles to wall
 
         sleepTau(INTERIM_TIME);
 
@@ -135,19 +128,19 @@ public class Auto_BLUE extends LinearOpMode{
 
         sleepTau(INTERIM_TIME);
 
-        TurnToAbsolute(-90);
+        TurnToAbsolute(90);
 
         sleepTau(INTERIM_TIME);
 
         for(int i = 0; i < 2; i++)
         {
-            DriveStraightUntilProximity(POWER,-90,0,1000);
+            DriveStraightUntilProximity(POWER,90,0,1000);
             telemetry.addData("Debug", "Driving Backwards");
             sleepTau(INTERIM_TIME);
-            DriveStraightBackwards(POWER,0.3,-90);
+            DriveStraightBackwards(POWER,0.3,90);
             telemetry.addData("Debug", getBeaconColor());
             telemetry.addData("Debug", "Reading Beacon");
-            if(colorIs(robot.BLUE)) {
+            if(!colorIs(robot.BLUE)) {
                 break;
             }
             if (i == 0)
@@ -170,17 +163,17 @@ public class Auto_BLUE extends LinearOpMode{
 
         sleepTau(INTERIM_TIME);
 
-        TurnToAbsolute(-90);
+        TurnToAbsolute(90);
 
         sleepTau(INTERIM_TIME);
 
         for(int i = 0; i < 2; i++)
         {
-            DriveStraightUntilProximity(POWER,-90,0,1000);
+            DriveStraightUntilProximity(POWER,90,0,1000);
             sleepTau(INTERIM_TIME);
-            DriveStraightBackwards(POWER,0.3,-90);
+            DriveStraightBackwards(POWER,0.3,90);
             telemetry.addData("Debug", getBeaconColor());
-            if(colorIs(robot.BLUE)) {
+            if(!colorIs(robot.BLUE)) {
                 break;
             }
             if (i == 0)

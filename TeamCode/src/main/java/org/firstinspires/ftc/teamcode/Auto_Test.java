@@ -78,7 +78,7 @@ public class Auto_Test extends LinearOpMode {
 
 
 
-        boolean change = false;
+        boolean change = true;
     }
 
     //
