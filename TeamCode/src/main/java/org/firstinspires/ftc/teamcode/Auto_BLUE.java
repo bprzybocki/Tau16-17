@@ -68,7 +68,7 @@ public class Auto_BLUE extends LinearOpMode{
         telemetry.addData("Status","Calibrating");
         telemetry.update();
         robot.mrGyro.calibrate();
-        while(robot.mrGyro.isCalibrating())
+        while(robot.mrGyro.isCalibrating() && opModeIsActive())
         {
 
         }
@@ -91,7 +91,7 @@ public class Auto_BLUE extends LinearOpMode{
         //FlywheelsOn();
 
         //CODE TO KEEP!!!
-        DriveStraightAbsolute(POWER,0.5,0);       //Speed of FULL POWER(1.0), One tile forward
+        DriveStraightAbsolute(FAST_POWER,0.4,0);       //Speed of FULL POWER(1.0), One tile forward
         //Shoot();
         //Shoot();
         //FlywheelsOff();
@@ -102,7 +102,7 @@ public class Auto_BLUE extends LinearOpMode{
 
         sleepTau(INTERIM_TIME);
 
-        DriveStraightAbsolute(POWER,3.0,-30);  //Drive halfway
+        DriveStraightAbsolute(FAST_POWER,2.8,-30);  //Drive halfway
 
         sleepTau(INTERIM_TIME);
 
@@ -131,7 +131,7 @@ public class Auto_BLUE extends LinearOpMode{
 
         sleepTau(INTERIM_TIME);
 
-        DriveStraightBackwards(POWER, 0.12, 0);
+        DriveStraightBackwards(POWER, 0.08, 0);
 
         sleepTau(INTERIM_TIME);
 
@@ -144,14 +144,14 @@ public class Auto_BLUE extends LinearOpMode{
             DriveStraightUntilProximity(POWER,-90,0,1000);
             telemetry.addData("Debug", "Driving Backwards");
             sleepTau(INTERIM_TIME);
-            DriveStraightBackwards(POWER,0.3,-90);
+            DriveStraightBackwards(POWER,0.25,-90);
             telemetry.addData("Debug", getBeaconColor());
             telemetry.addData("Debug", "Reading Beacon");
             if(colorIs(robot.BLUE)) {
                 break;
             }
-            if (i == 0)
-                sleepTau(5000);
+            //if (i == 0)
+            //    sleepTau(5000);
         }
 
         telemetry.addData("Debug", "Turning");
@@ -166,7 +166,7 @@ public class Auto_BLUE extends LinearOpMode{
 
         sleepTau(INTERIM_TIME);
 
-        DriveStraightAbsolute(POWER, 0.17, 0);
+        DriveStraightAbsolute(POWER, 0.12, 0);
 
         sleepTau(INTERIM_TIME);
 
@@ -178,7 +178,7 @@ public class Auto_BLUE extends LinearOpMode{
         {
             DriveStraightUntilProximity(POWER,-90,0,1000);
             sleepTau(INTERIM_TIME);
-            DriveStraightBackwards(POWER,0.3,-90);
+            DriveStraightBackwards(POWER,0.25,-90);
             telemetry.addData("Debug", getBeaconColor());
             if(colorIs(robot.BLUE)) {
                 break;
@@ -219,7 +219,7 @@ public class Auto_BLUE extends LinearOpMode{
         telemetry.addData("Left Ticks", robot.leftMotor.getCurrentPosition());
         telemetry.update();
 
-        while (robot.leftMotor.getCurrentPosition()*LEFT_POLARITY < target_count) {
+        while (robot.leftMotor.getCurrentPosition()*LEFT_POLARITY < target_count && opModeIsActive()) {
             int error = targetHeading - getHeading(); //positive error means need to go counterclockwise
             robot.leftMotor.setPower(Math.max(speed - error*ERROR_ADJUSTMENT, 0)); //don't go below 0
             robot.rightMotor.setPower(Math.min(speed + error*ERROR_ADJUSTMENT, 1)); //don't go above 1
@@ -280,10 +280,17 @@ public class Auto_BLUE extends LinearOpMode{
     }
     public void sleepTau(long millis)
     {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        double startTime = robot.getTime();
+
+        double targetTime = startTime + ((double) millis) / 1000;
+
+        while (robot.getTime() < targetTime && opModeIsActive())
+        {
+            try {
+                idle();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
     public void leftSetPower(double power, long mili)
@@ -313,15 +320,16 @@ public class Auto_BLUE extends LinearOpMode{
 
     public void Shoot()
     {
-        robot.sleepTau(3000);
+        sleepTau(3000);
         robot.flyWheelPiston.setPosition(robot.PISTON_UP);
-        robot.sleepTau(500);
+        sleepTau(500);
         robot.flyWheelPiston.setPosition(robot.PISTON_DOWN);
     }
 
 
 
     public int getBeaconColor(){
+        //return 0;
         colorAcache = robot.colorAreader.read(0x04, 1);
         return colorAcache[0] & 0xFF;
     }
@@ -348,7 +356,7 @@ public class Auto_BLUE extends LinearOpMode{
         telemetry.addData("Left Ticks", robot.leftMotor.getCurrentPosition());
         telemetry.update();
 
-        while (!foundLine) {
+        while (!foundLine && opModeIsActive()) {
             int error = targetHeading - getHeading(); //positive error means need to go counterclockwise
             robot.leftMotor.setPower(Math.max(speed - error*ERROR_ADJUSTMENT, 0)); //don't go below 0
             robot.rightMotor.setPower(Math.min(speed + error*ERROR_ADJUSTMENT, 1)); //don't go above 1
@@ -384,7 +392,7 @@ public class Auto_BLUE extends LinearOpMode{
         telemetry.addData("Left Ticks", robot.leftMotor.getCurrentPosition());
         telemetry.update();
 
-        while (!foundLine) {
+        while (!foundLine && opModeIsActive()) {
             int error = targetHeading - getHeading(); //positive error means need to go counterclockwise
             robot.leftMotor.setPower(-1*Math.min(speed + error*ERROR_ADJUSTMENT, 1)); //don't go below 0
             robot.rightMotor.setPower(-1*Math.max(speed - error*ERROR_ADJUSTMENT, 0)); //don't go above 1
@@ -424,7 +432,7 @@ public class Auto_BLUE extends LinearOpMode{
         telemetry.addData("Left Ticks", robot.leftMotor.getCurrentPosition());
         telemetry.update();
 
-        while (robot.leftMotor.getCurrentPosition()*LEFT_POLARITY < target_count) {
+        while (robot.leftMotor.getCurrentPosition()*LEFT_POLARITY < target_count && opModeIsActive()) {
             int error = targetHeading - getHeading(); //positive error means need to go counterclockwise
             robot.leftMotor.setPower(-1*Math.min(speed + error*ERROR_ADJUSTMENT, 1)); //don't go below 0
             robot.rightMotor.setPower(-1*Math.max(speed - error*ERROR_ADJUSTMENT, 0)); //don't go above 1
@@ -460,7 +468,7 @@ public class Auto_BLUE extends LinearOpMode{
         telemetry.update();
         double startTime = runtime.milliseconds();
 
-        while (getUltrasonicDistance() > distance && runtime.milliseconds() - startTime < timeoutMiliseconds) {
+        while (getUltrasonicDistance() > distance && runtime.milliseconds() - startTime < timeoutMiliseconds && opModeIsActive()) {
             int error = targetHeading - getHeading(); //positive error means need to go counterclockwise
             robot.leftMotor.setPower(Math.max(speed - error*ERROR_ADJUSTMENT, 0)); //don't go below 0
             robot.rightMotor.setPower(Math.min(speed + error*ERROR_ADJUSTMENT, 1)); //don't go above 1
@@ -497,7 +505,7 @@ public class Auto_BLUE extends LinearOpMode{
         telemetry.update();
         double startTime = runtime.milliseconds();
 
-        while (getUltrasonicDistance() < distance && runtime.milliseconds() - startTime < timeoutMiliseconds) {
+        while (getUltrasonicDistance() < distance && runtime.milliseconds() - startTime < timeoutMiliseconds && opModeIsActive()) {
             int error = targetHeading - getHeading(); //positive error means need to go counterclockwise
             robot.leftMotor.setPower(-Math.min(speed + error*ERROR_ADJUSTMENT, 1)); //don't go below 0
             robot.rightMotor.setPower(-Math.max(speed - error*ERROR_ADJUSTMENT, 0)); //don't go above 1
@@ -523,9 +531,11 @@ public class Auto_BLUE extends LinearOpMode{
     }
     public boolean colorIs(int color)
     {
+        return true;
+        /*
         if (getBeaconColor() == color - 1 || getBeaconColor() == color || getBeaconColor() == color + 1)
             return true;
         else
-            return false;
+            return false;*/
     }
 }

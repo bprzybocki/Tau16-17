@@ -4,17 +4,14 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.util.Range;
-
-import org.firstinspires.ftc.teamcode.Hardware;
 
 /**
  * Created by Benjamin on 10/5/2016.
  */
 
-@TeleOp(name="Tau: Teleop", group="Tau")
-@Disabled
-public class Teleop extends OpMode {
+@TeleOp(name="Tau: Teleop 2", group="Tau")
+//@Disabled
+public class Teleop2 extends OpMode {
 
     Hardware robot = new Hardware();
 

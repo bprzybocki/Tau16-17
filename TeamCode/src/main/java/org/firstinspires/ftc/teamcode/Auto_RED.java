@@ -273,10 +273,17 @@ public class Auto_RED extends LinearOpMode{
     }
     public void sleepTau(long millis)
     {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        double startTime = robot.getTime();
+
+        double targetTime = startTime + ((double) millis) / 1000;
+
+        while (robot.getTime() < targetTime && opModeIsActive())
+        {
+            try {
+                idle();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
     public void leftSetPower(double power, long mili)
@@ -306,9 +313,9 @@ public class Auto_RED extends LinearOpMode{
 
     public void Shoot()
     {
-        robot.sleepTau(3000);
+        sleepTau(3000);
         robot.flyWheelPiston.setPosition(robot.PISTON_UP);
-        robot.sleepTau(500);
+        sleepTau(500);
         robot.flyWheelPiston.setPosition(robot.PISTON_DOWN);
     }
 

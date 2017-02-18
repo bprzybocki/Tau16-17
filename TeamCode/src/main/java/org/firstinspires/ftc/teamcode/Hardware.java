@@ -53,7 +53,7 @@ public class Hardware {
     //public static final double PISTON_UP = 0.83;
     public static final double PISTON_UP    = 0.2;
     public static final double PISTON_DOWN  = 1;
-    public static final double FLYWHEEL_PWR = -0.45;
+    public static final double FLYWHEEL_PWR = -0.3;
     public static final int FLYWHEEL_SPD    = 4000;
     public static final int COLOR_THRESHOLD = 96; //needs testing
     public static final int BLUE = 3;
@@ -66,6 +66,7 @@ public class Hardware {
 
     public void init(HardwareMap hwMap) {
         // Save reference to Hardware map
+        period.reset();
         this.hwMap = hwMap;
 
         // Define and Initialize Motors
@@ -165,12 +166,9 @@ public class Hardware {
         // Reset the cycle clock for the next pass.
         period.reset();
     }
-    public void sleepTau(long millis)
+
+    public double getTime()
     {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        return period.time();
     }
 }

@@ -50,31 +50,6 @@ public class Auto_Test extends LinearOpMode {
         telemetry.update();
 
         //DriveStraightAbsolute(0.25,5.0,0);
-        TurnToAbsolute(90);
-        robot.sleepTau(2500);
-        telemetry.addData("Gyro", getHeading());
-        telemetry.update();
-        robot.sleepTau(2500);
-        TurnToAbsolute(0);
-        robot.sleepTau(2500);
-        telemetry.addData("Gyro", getHeading());
-        telemetry.update();
-        robot.sleepTau(2500);
-        TurnToAbsolute(-90);
-        robot.sleepTau(2500);
-        telemetry.addData("Gyro", getHeading());
-        telemetry.update();
-        robot.sleepTau(2500);
-        TurnToAbsolute(-45);
-        robot.sleepTau(2500);
-        telemetry.addData("Gyro", getHeading());
-        telemetry.update();
-        robot.sleepTau(2500);
-        TurnToAbsolute(-90);
-        robot.sleepTau(2500);
-        telemetry.addData("Gyro", getHeading());
-        telemetry.update();
-        robot.sleepTau(2500);
 
 
 
