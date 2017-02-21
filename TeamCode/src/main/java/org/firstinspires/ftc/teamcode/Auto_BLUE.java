@@ -192,11 +192,14 @@ public class Auto_BLUE extends LinearOpMode{
             if (i == 0) {
                 DoubleShoot(); // takes 4 seconds
             }
-            if(colorIs(robot.COLOR_IS_BLUE) || colorIs(robot.COLOR_IS_BOTH) || colorIs(robot.COLOR_IS_NONE)) {
+            if (colorIs(robot.COLOR_IS_BLUE) || colorIs(robot.COLOR_IS_BOTH) || colorIs(robot.COLOR_IS_NONE)) {
+                sleepTau(INTERIM_TIME);
                 break;
             }
-            sleepTau(1000); // sleep 1 more second to let beacon reset
+            if (i == 0)
+                sleepTau(1000); // sleep 1 more second to let beacon reset
         }
+
 
         DriveStraightBackwards(FAST_POWER,2,-90);
 
