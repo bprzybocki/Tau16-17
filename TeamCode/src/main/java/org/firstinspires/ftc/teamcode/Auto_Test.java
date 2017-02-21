@@ -53,7 +53,7 @@ public class Auto_Test extends LinearOpMode {
 
 
 
-        boolean change = true;
+        boolean change = false;
     }
 
     //
@@ -118,7 +118,7 @@ public class Auto_Test extends LinearOpMode {
         int THRESHOLD = 14;
 
         while (diff > THRESHOLD && opModeIsActive()) {  //Continue while the robot direction is further than three degrees from the target
-            if (heading > target) {  //if gyro is positive, we will turn right
+            if (heading > target) {  //if gyro is p.ositive, we will turn right
                 robot.leftMotor.setPower(0.4);
                 robot.rightMotor.setPower(-0.4); //clockwise (slower, needs higher power)
             }

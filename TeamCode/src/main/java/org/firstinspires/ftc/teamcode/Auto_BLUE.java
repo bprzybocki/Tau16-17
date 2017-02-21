@@ -18,7 +18,7 @@ import com.qualcomm.robotcore.hardware.I2cDevice;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynchImpl;
 
-@Autonomous(name = "Tau: Auto Blue", group = "Tau")
+@Autonomous(name = "Full Blue", group = "Tau")
 public class Auto_BLUE extends LinearOpMode{
     /* Declare OpMode members. */
     Hardware robot = new Hardware();
@@ -33,10 +33,11 @@ public class Auto_BLUE extends LinearOpMode{
     static final double ERROR  = 1.5;
     static final int INTERIM_TIME = 100;
     static final double FAST_POWER = 0.5;
-    static final double POWER = 0.4;
-    static final double LINE_POWER = 0.25; // Slower because we don't want to miss line
+    static final double POWER = 0.40;
+    static final double LINE_POWER = 0.2; // Slower because we don't want to miss line
 
     static byte[] colorAcache;
+    static byte[] colorBcache;
     static byte[] colorCcache;
 
     static byte[] range1Cache;
@@ -48,8 +49,10 @@ public class Auto_BLUE extends LinearOpMode{
 
 
     static I2cDevice colorA;
+    static I2cDevice colorB;
     static I2cDevice colorC;
     static I2cDeviceSynch colorAreader;
+    static I2cDeviceSynch colorBreader;
     static I2cDeviceSynch colorCreader;
     int zAccumulated = 0;  //Total rotation left/right
     int heading = 0;       //Heading left/right. Integer between 0 and 359
@@ -131,7 +134,7 @@ public class Auto_BLUE extends LinearOpMode{
 
         sleepTau(INTERIM_TIME);
 
-        DriveStraightBackwards(POWER, 0.08, 0);
+        DriveStraightBackwards(POWER, 0.07, 0);
 
         sleepTau(INTERIM_TIME);
 
@@ -139,30 +142,31 @@ public class Auto_BLUE extends LinearOpMode{
 
         sleepTau(INTERIM_TIME);
 
+        FlywheelsOn();
+
         for(int i = 0; i < 2; i++)
         {
             DriveStraightUntilProximity(POWER,-90,0,1000);
             telemetry.addData("Debug", "Driving Backwards");
             sleepTau(INTERIM_TIME);
-            DriveStraightBackwards(POWER,0.25,-90);
-            telemetry.addData("Debug", getBeaconColor());
+            DriveStraightBackwards(POWER,0.17,-90);
+            telemetry.addData("Beacon R", getBeaconColor_R());
             telemetry.addData("Debug", "Reading Beacon");
-            if(colorIs(robot.BLUE)) {
+            if(colorIs(robot.COLOR_IS_BLUE) || colorIs(robot.COLOR_IS_BOTH) || colorIs(robot.COLOR_IS_NONE)) {
                 break;
             }
-            //if (i == 0)
-            //    sleepTau(5000);
+            if (i == 0)
+                sleepTau(5000);
         }
 
         telemetry.addData("Debug", "Turning");
-
         sleepTau(INTERIM_TIME);
 
         TurnToAbsolute(0);
 
         sleepTau(INTERIM_TIME);
 
-        DriveBackwardsUntilLine(LINE_POWER,0);
+        DriveBackwardsUntilLine(LINE_POWER+0.1,0);
 
         sleepTau(INTERIM_TIME);
 
@@ -174,18 +178,29 @@ public class Auto_BLUE extends LinearOpMode{
 
         sleepTau(INTERIM_TIME);
 
-        for(int i = 0; i < 2; i++)
+        //THROWAWAY CODE
+        //TurnToAbsolute(-90);
+        //FlywheelsOn();
+        //sleepTau(5000);
+
+        for (int i = 0; i < 2; i++)
         {
             DriveStraightUntilProximity(POWER,-90,0,1000);
             sleepTau(INTERIM_TIME);
-            DriveStraightBackwards(POWER,0.25,-90);
-            telemetry.addData("Debug", getBeaconColor());
-            if(colorIs(robot.BLUE)) {
+            DriveStraightBackwards(POWER,0.17,-90);
+            telemetry.addData("Beacon R", getBeaconColor_R());
+            if (i == 0) {
+                DoubleShoot(); // takes 4 seconds
+            }
+            if(colorIs(robot.COLOR_IS_BLUE) || colorIs(robot.COLOR_IS_BOTH) || colorIs(robot.COLOR_IS_NONE)) {
                 break;
             }
-            if (i == 0)
-                sleepTau(5000);
+            sleepTau(1000); // sleep 1 more second to let beacon reset
         }
+
+        DriveStraightBackwards(FAST_POWER,2,-90);
+
+        PistonStow();
 
         //sleepTau(INTERIM_TIME);
 
@@ -309,30 +324,47 @@ public class Auto_BLUE extends LinearOpMode{
     }
     public void FlywheelsOn()
     {
-        robot.flywheelMotorL.setPower(robot.FLYWHEEL_PWR);
-        robot.flywheelMotorL.setPower(robot.FLYWHEEL_PWR);
+        robot.flywheelMotorL.setPower(robot.FLYWHEEL_AUTO);
+        robot.flywheelMotorR.setPower(robot.FLYWHEEL_AUTO);
     }
     public void FlywheelsOff()
     {
         robot.flywheelMotorL.setPower(0);
-        robot.flywheelMotorL.setPower(0);
+        robot.flywheelMotorR.setPower(0);
     }
 
     public void Shoot()
     {
-        sleepTau(3000);
         robot.flyWheelPiston.setPosition(robot.PISTON_UP);
-        sleepTau(500);
+        sleepTau(1000);
         robot.flyWheelPiston.setPosition(robot.PISTON_DOWN);
     }
 
+    public void DoubleShoot()
+    {
+        robot.flyWheelPiston.setPosition(robot.PISTON_UP);
+        sleepTau(1000);
+        robot.flyWheelPiston.setPosition(robot.PISTON_DOWN);
+        sleepTau(3000);
+        robot.flyWheelPiston.setPosition(robot.PISTON_UP);
+    }
 
+    public void PistonStow()
+    {
+        robot.flyWheelPiston.setPosition(robot.PISTON_DOWN);
+    }
 
-    public int getBeaconColor(){
+    public int getBeaconColor_R(){
         //return 0;
         colorAcache = robot.colorAreader.read(0x04, 1);
         return colorAcache[0] & 0xFF;
     }
+    public int getBeaconColor_L(){
+        //return 0;
+        colorBcache = robot.colorBreader.read(0x04, 1);
+        return colorBcache[0] & 0xFF;
+    }
+
     public int getGroundColor(){
         colorCcache = robot.colorCreader.read(0x04,1);
         return colorCcache[0] & 0xFF;
@@ -529,13 +561,34 @@ public class Auto_BLUE extends LinearOpMode{
         range1Cache = robot.RANGE1Reader.read(robot.RANGE1_REG_START, robot.RANGE1_READ_LENGTH);
         return range1Cache[1] & 0xFF;
     }
-    public boolean colorIs(int color)
+    public boolean colorIs(byte sensor, byte color)
     {
-        return true;
-        /*
-        if (getBeaconColor() == color - 1 || getBeaconColor() == color || getBeaconColor() == color + 1)
-            return true;
-        else
-            return false;*/
+        int sensor_reading = (sensor == robot.LEFT_COLOR) ? getBeaconColor_L() : getBeaconColor_R();
+
+        if (color == robot.COLOR_IS_BLUE) {
+            return Math.abs(sensor_reading - robot.BLUE) <= 1;
+        } else if (color == robot.COLOR_IS_RED) {
+            return Math.abs(sensor_reading - robot.RED) <= 1;
+        } else if (color == robot.COLOR_IS_NONE) {
+            return !colorIs(sensor, robot.COLOR_IS_BLUE) && !colorIs(sensor, robot.COLOR_IS_RED);
+        }
+        return false;
+    }
+
+    public boolean colorIs(byte color)
+    {
+        if (color == robot.COLOR_IS_BOTH) {
+            return (colorIs(robot.LEFT_COLOR, robot.COLOR_IS_RED) && colorIs(robot.RIGHT_COLOR, robot.COLOR_IS_BLUE)) ||
+                    (colorIs(robot.RIGHT_COLOR, robot.COLOR_IS_RED) && colorIs(robot.LEFT_COLOR, robot.COLOR_IS_BLUE));
+        } else if (color == robot.COLOR_IS_RED) {
+            return !colorIs(robot.COLOR_IS_BOTH) &&
+                    (colorIs(robot.LEFT_COLOR, robot.COLOR_IS_RED) || colorIs(robot.RIGHT_COLOR, robot.COLOR_IS_RED));
+        } else if (color == robot.COLOR_IS_BLUE) {
+            return !colorIs(robot.COLOR_IS_BOTH) &&
+                    (colorIs(robot.LEFT_COLOR, robot.COLOR_IS_BLUE) || colorIs(robot.RIGHT_COLOR, robot.COLOR_IS_BLUE));
+        } else if (color == robot.COLOR_IS_NONE) {
+            return !colorIs(robot.COLOR_IS_BOTH) && !colorIs(robot.COLOR_IS_RED) && !colorIs(robot.COLOR_IS_BLUE);
+        }
+        return false;
     }
 }

@@ -3,16 +3,22 @@ package org.firstinspires.ftc.teamcode;
 /**
  * Created by BobChuckyJoe on 1/30/2017.
  */
-
-import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.GyroSensor;
+import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
+import com.qualcomm.robotcore.util.Range;
+import com.qualcomm.robotcore.hardware.LightSensor;
+import com.qualcomm.robotcore.hardware.I2cAddr;
 import com.qualcomm.robotcore.hardware.I2cDevice;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
-import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.hardware.I2cDeviceSynchImpl;
 
-@Autonomous(name = "Tau: Auto Red", group = "Tau")
+@Autonomous(name = "Full Red", group = "Tau")
 public class Auto_RED extends LinearOpMode{
     /* Declare OpMode members. */
     Hardware robot = new Hardware();
@@ -26,8 +32,9 @@ public class Auto_RED extends LinearOpMode{
     static final double TURN_SPEED            = 0.5;
     static final double ERROR  = 1.5;
     static final int INTERIM_TIME = 100;
-    static final double POWER = 0.4;
-    static final double LINE_POWER = 0.25; // Slower because we don't want to miss line
+    static final double FAST_POWER = 0.5;
+    static final double POWER = 0.40;
+    static final double LINE_POWER = 0.2; // Slower because we don't want to miss line
 
     static byte[] colorAcache;
     static byte[] colorCcache;
@@ -61,7 +68,7 @@ public class Auto_RED extends LinearOpMode{
         telemetry.addData("Status","Calibrating");
         telemetry.update();
         robot.mrGyro.calibrate();
-        while(robot.mrGyro.isCalibrating())
+        while(robot.mrGyro.isCalibrating() && opModeIsActive())
         {
 
         }
@@ -84,7 +91,7 @@ public class Auto_RED extends LinearOpMode{
         //FlywheelsOn();
 
         //CODE TO KEEP!!!
-        DriveStraightAbsolute(POWER,0.5,0);       //Speed of FULL POWER(1.0), One tile forward
+        DriveStraightAbsolute(FAST_POWER,0.4,0);       //Speed of FULL POWER(1.0), One tile forward
         //Shoot();
         //Shoot();
         //FlywheelsOff();
@@ -95,27 +102,27 @@ public class Auto_RED extends LinearOpMode{
 
         sleepTau(INTERIM_TIME);
 
-        DriveStraightAbsolute(POWER,3.0,30);  //Drive halfway
+        DriveStraightAbsolute(FAST_POWER,2.8,30);  //Drive halfway
 
         sleepTau(INTERIM_TIME);
 
-        TurnToAbsolute(90);
+        /*TurnToAbsolute(-90);
 
         //PART TWO OF CODE!!!
 
         //THROWAWAY CODE
-        //TurnToAbsolute(90);
+        //TurnToAbsolute(-90);
 
         sleepTau(INTERIM_TIME);
 
         telemetry.addData("Debug", getHeading());
 
-        DriveStraightUntilProximity(POWER,90,35,10000);    //Drive UNTIL 0.5 tiles to wall
+        DriveStraightUntilProximity(POWER,-90,35,10000);    //Drive UNTIL 0.5 tiles to wall
 
         sleepTau(INTERIM_TIME);
 
         telemetry.addData("Debug", getHeading());
-
+        */
         TurnToAbsolute(0);
 
         sleepTau(INTERIM_TIME);
@@ -124,7 +131,7 @@ public class Auto_RED extends LinearOpMode{
 
         sleepTau(INTERIM_TIME);
 
-        DriveStraightBackwards(POWER, 0.12, 0);
+        DriveStraightBackwards(POWER, 0.09, 0);
 
         sleepTau(INTERIM_TIME);
 
@@ -137,8 +144,8 @@ public class Auto_RED extends LinearOpMode{
             DriveStraightUntilProximity(POWER,90,0,1000);
             telemetry.addData("Debug", "Driving Backwards");
             sleepTau(INTERIM_TIME);
-            DriveStraightBackwards(POWER,0.3,90);
-            telemetry.addData("Debug", getBeaconColor());
+            DriveStraightBackwards(POWER,0.17,90);
+            telemetry.addData("Beacon", getBeaconColor());
             telemetry.addData("Debug", "Reading Beacon");
             if(!colorIs(robot.BLUE)) {
                 break;
@@ -148,7 +155,6 @@ public class Auto_RED extends LinearOpMode{
         }
 
         telemetry.addData("Debug", "Turning");
-
         sleepTau(INTERIM_TIME);
 
         TurnToAbsolute(0);
@@ -159,7 +165,7 @@ public class Auto_RED extends LinearOpMode{
 
         sleepTau(INTERIM_TIME);
 
-        DriveStraightAbsolute(POWER, 0.17, 0);
+        DriveStraightAbsolute(POWER, 0.13, 0);
 
         sleepTau(INTERIM_TIME);
 
@@ -171,8 +177,8 @@ public class Auto_RED extends LinearOpMode{
         {
             DriveStraightUntilProximity(POWER,90,0,1000);
             sleepTau(INTERIM_TIME);
-            DriveStraightBackwards(POWER,0.3,90);
-            telemetry.addData("Debug", getBeaconColor());
+            DriveStraightBackwards(POWER,0.17,90);
+            telemetry.addData("Beacon", getBeaconColor());
             if(!colorIs(robot.BLUE)) {
                 break;
             }
@@ -212,7 +218,7 @@ public class Auto_RED extends LinearOpMode{
         telemetry.addData("Left Ticks", robot.leftMotor.getCurrentPosition());
         telemetry.update();
 
-        while (robot.leftMotor.getCurrentPosition()*LEFT_POLARITY < target_count) {
+        while (robot.leftMotor.getCurrentPosition()*LEFT_POLARITY < target_count && opModeIsActive()) {
             int error = targetHeading - getHeading(); //positive error means need to go counterclockwise
             robot.leftMotor.setPower(Math.max(speed - error*ERROR_ADJUSTMENT, 0)); //don't go below 0
             robot.rightMotor.setPower(Math.min(speed + error*ERROR_ADJUSTMENT, 1)); //don't go above 1
@@ -322,6 +328,7 @@ public class Auto_RED extends LinearOpMode{
 
 
     public int getBeaconColor(){
+        //return 0;
         colorAcache = robot.colorAreader.read(0x04, 1);
         return colorAcache[0] & 0xFF;
     }
@@ -348,7 +355,7 @@ public class Auto_RED extends LinearOpMode{
         telemetry.addData("Left Ticks", robot.leftMotor.getCurrentPosition());
         telemetry.update();
 
-        while (!foundLine) {
+        while (!foundLine && opModeIsActive()) {
             int error = targetHeading - getHeading(); //positive error means need to go counterclockwise
             robot.leftMotor.setPower(Math.max(speed - error*ERROR_ADJUSTMENT, 0)); //don't go below 0
             robot.rightMotor.setPower(Math.min(speed + error*ERROR_ADJUSTMENT, 1)); //don't go above 1
@@ -384,7 +391,7 @@ public class Auto_RED extends LinearOpMode{
         telemetry.addData("Left Ticks", robot.leftMotor.getCurrentPosition());
         telemetry.update();
 
-        while (!foundLine) {
+        while (!foundLine && opModeIsActive()) {
             int error = targetHeading - getHeading(); //positive error means need to go counterclockwise
             robot.leftMotor.setPower(-1*Math.min(speed + error*ERROR_ADJUSTMENT, 1)); //don't go below 0
             robot.rightMotor.setPower(-1*Math.max(speed - error*ERROR_ADJUSTMENT, 0)); //don't go above 1
@@ -424,7 +431,7 @@ public class Auto_RED extends LinearOpMode{
         telemetry.addData("Left Ticks", robot.leftMotor.getCurrentPosition());
         telemetry.update();
 
-        while (robot.leftMotor.getCurrentPosition()*LEFT_POLARITY < target_count) {
+        while (robot.leftMotor.getCurrentPosition()*LEFT_POLARITY < target_count && opModeIsActive()) {
             int error = targetHeading - getHeading(); //positive error means need to go counterclockwise
             robot.leftMotor.setPower(-1*Math.min(speed + error*ERROR_ADJUSTMENT, 1)); //don't go below 0
             robot.rightMotor.setPower(-1*Math.max(speed - error*ERROR_ADJUSTMENT, 0)); //don't go above 1
@@ -460,7 +467,7 @@ public class Auto_RED extends LinearOpMode{
         telemetry.update();
         double startTime = runtime.milliseconds();
 
-        while (getUltrasonicDistance() > distance && runtime.milliseconds() - startTime < timeoutMiliseconds) {
+        while (getUltrasonicDistance() > distance && runtime.milliseconds() - startTime < timeoutMiliseconds && opModeIsActive()) {
             int error = targetHeading - getHeading(); //positive error means need to go counterclockwise
             robot.leftMotor.setPower(Math.max(speed - error*ERROR_ADJUSTMENT, 0)); //don't go below 0
             robot.rightMotor.setPower(Math.min(speed + error*ERROR_ADJUSTMENT, 1)); //don't go above 1
@@ -497,7 +504,7 @@ public class Auto_RED extends LinearOpMode{
         telemetry.update();
         double startTime = runtime.milliseconds();
 
-        while (getUltrasonicDistance() < distance && runtime.milliseconds() - startTime < timeoutMiliseconds) {
+        while (getUltrasonicDistance() < distance && runtime.milliseconds() - startTime < timeoutMiliseconds && opModeIsActive()) {
             int error = targetHeading - getHeading(); //positive error means need to go counterclockwise
             robot.leftMotor.setPower(-Math.min(speed + error*ERROR_ADJUSTMENT, 1)); //don't go below 0
             robot.rightMotor.setPower(-Math.max(speed - error*ERROR_ADJUSTMENT, 0)); //don't go above 1

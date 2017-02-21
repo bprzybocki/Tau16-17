@@ -73,6 +73,7 @@ public class Color extends OpMode {
     public void loop() {
         telemetry.addData("HSV", getBeaconColor());
         telemetry.addData("DIST", getUltrasonicDistance());
+        telemetry.addData("Ground", getGroundColor());
         telemetry.update();
     }
 
@@ -83,5 +84,9 @@ public class Color extends OpMode {
     public int getUltrasonicDistance(){
         range1Cache = robot.RANGE1Reader.read(robot.RANGE1_REG_START, robot.RANGE1_READ_LENGTH);
         return range1Cache[0] & 0xFF;
+    }
+    public int getGroundColor(){
+        colorCcache = robot.colorCreader.read(0x04,1);
+        return colorCcache[0] & 0xFF;
     }
 }

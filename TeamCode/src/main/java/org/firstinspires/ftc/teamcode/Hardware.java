@@ -40,23 +40,35 @@ public class Hardware {
     public I2cDeviceSynch RANGE1Reader;
 
     public static I2cDevice colorA;
+    public static I2cDevice colorB;
     public static I2cDevice colorC;
     public static I2cDeviceSynch colorAreader;
+    public static I2cDeviceSynch colorBreader;
     public static I2cDeviceSynch colorCreader;
 
 
 
     //public ModernRoboticsI2cGyro gyro = null;
-    public I2cDevice beaconSensor = null;
+    public I2cDevice beaconSensor_l = null;
+    public I2cDevice beaconSensor_r = null;
     public I2cDevice groundSensor = null;
     //public static final double PISTON_DOWN = 0.33;
     //public static final double PISTON_UP = 0.83;
     public static final double PISTON_UP    = 0.2;
     public static final double PISTON_DOWN  = 1;
-    public static final double FLYWHEEL_PWR = -0.3;
+    public static final double FLYWHEEL_PWR = -0.28;
+    public static final double FLYWHEEL_AUTO = -0.25;
     public static final int FLYWHEEL_SPD    = 4000;
     public static final int COLOR_THRESHOLD = 96; //needs testing
     public static final int BLUE = 3;
+    public static final int RED = 11;
+    public static final byte COLOR_IS_BLUE = 0;
+    public static final byte COLOR_IS_RED = 1;
+    public static final byte COLOR_IS_BOTH = 2;
+    public static final byte COLOR_IS_NONE = 3;
+    public static final byte LEFT_COLOR = 0;
+    public static final byte RIGHT_COLOR = 1;
+
 
     HardwareMap hwMap = null;
     private ElapsedTime period = new ElapsedTime();
@@ -81,7 +93,8 @@ public class Hardware {
         flywheelMotorL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         flywheelMotorR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
-        beaconSensor = hwMap.i2cDevice.get("beacon_sens");
+        beaconSensor_l = hwMap.i2cDevice.get("beacon_sens_l");
+        beaconSensor_r = hwMap.i2cDevice.get("beacon_sens_r");
         groundSensor = hwMap.i2cDevice.get("ground_sens");
 
         sensorGyro = hwMap.gyroSensor.get("gyro");  //Point to the gyro in the configuration file
@@ -91,17 +104,21 @@ public class Hardware {
         RANGE1Reader = new I2cDeviceSynchImpl(RANGE1, RANGE1ADDRESS, false);
         RANGE1Reader.engage();
 
-        colorA = beaconSensor;
+        colorA = beaconSensor_r;
+        colorB = beaconSensor_l;
         colorC = groundSensor;
 
         colorAreader = new I2cDeviceSynchImpl(colorA, I2cAddr.create8bit(0x3c), false);
+        colorBreader = new I2cDeviceSynchImpl(colorB, I2cAddr.create8bit(0x4c), false);
         colorCreader = new I2cDeviceSynchImpl(colorC, I2cAddr.create8bit(0x5c), false);
 
 
         colorAreader.engage();
+        colorBreader.engage();
         colorCreader.engage();
 
         colorAreader.write8(3,1);
+        colorBreader.write8(3,1);
         colorCreader.write8(3,0);
 
 
