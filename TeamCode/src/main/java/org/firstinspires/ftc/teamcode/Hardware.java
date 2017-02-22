@@ -56,8 +56,8 @@ public class Hardware {
     //public static final double PISTON_UP = 0.83;
     public static final double PISTON_UP    = 0.2;
     public static final double PISTON_DOWN  = 1;
-    public static final double FLYWHEEL_PWR = -0.28;
-    public static final double FLYWHEEL_AUTO = -0.25;
+    public static final double FLYWHEEL_PWR = -1;
+    public static final double FLYWHEEL_AUTO = -1;
     public static final int FLYWHEEL_SPD    = 4000;
     public static final int COLOR_THRESHOLD = 96; //needs testing
     public static final int BLUE = 3;
@@ -153,8 +153,8 @@ public class Hardware {
         intakeMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         //intakeMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        flywheelMotorL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        flywheelMotorR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        flywheelMotorL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        flywheelMotorR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         // Define and initialize ALL installed servos.
         flyWheelPiston = hwMap.servo.get("fly_piston");
         flyWheelPiston.setPosition(PISTON_DOWN);

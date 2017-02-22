@@ -54,8 +54,8 @@ public class Teleop2 extends OpMode {
         updateTelemetry(telemetry);
         //robot.buttonSensorL.enableLed(true);
         //robot.buttonSensorR.enableLed(true);
-        robot.flywheelMotorL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        robot.flywheelMotorR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        robot.flywheelMotorL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.flywheelMotorR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         robot.leftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         robot.rightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);

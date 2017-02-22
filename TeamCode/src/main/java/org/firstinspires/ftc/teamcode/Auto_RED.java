@@ -37,6 +37,7 @@ public class Auto_RED extends LinearOpMode{
     static final double LINE_POWER = 0.2; // Slower because we don't want to miss line
 
     static byte[] colorAcache;
+    static byte[] colorBcache;
     static byte[] colorCcache;
 
     static byte[] range1Cache;
@@ -48,8 +49,10 @@ public class Auto_RED extends LinearOpMode{
 
 
     static I2cDevice colorA;
+    static I2cDevice colorB;
     static I2cDevice colorC;
     static I2cDeviceSynch colorAreader;
+    static I2cDeviceSynch colorBreader;
     static I2cDeviceSynch colorCreader;
     int zAccumulated = 0;  //Total rotation left/right
     int heading = 0;       //Heading left/right. Integer between 0 and 359
@@ -106,7 +109,7 @@ public class Auto_RED extends LinearOpMode{
 
         sleepTau(INTERIM_TIME);
 
-        /*TurnToAbsolute(-90);
+        TurnToAbsolute(90);
 
         //PART TWO OF CODE!!!
 
@@ -117,12 +120,12 @@ public class Auto_RED extends LinearOpMode{
 
         telemetry.addData("Debug", getHeading());
 
-        DriveStraightUntilProximity(POWER,-90,35,10000);    //Drive UNTIL 0.5 tiles to wall
+        DriveStraightUntilProximity(POWER,90,35,10000);    //Drive UNTIL 0.5 tiles to wall
 
         sleepTau(INTERIM_TIME);
 
         telemetry.addData("Debug", getHeading());
-        */
+
         TurnToAbsolute(0);
 
         sleepTau(INTERIM_TIME);
@@ -131,7 +134,7 @@ public class Auto_RED extends LinearOpMode{
 
         sleepTau(INTERIM_TIME);
 
-        DriveStraightBackwards(POWER, 0.09, 0);
+        DriveStraightBackwards(POWER, 0.07, 0);
 
         sleepTau(INTERIM_TIME);
 
@@ -139,20 +142,24 @@ public class Auto_RED extends LinearOpMode{
 
         sleepTau(INTERIM_TIME);
 
+        FlywheelsOn();
+
         for(int i = 0; i < 2; i++)
         {
             DriveStraightUntilProximity(POWER,90,0,1000);
             telemetry.addData("Debug", "Driving Backwards");
             sleepTau(INTERIM_TIME);
             DriveStraightBackwards(POWER,0.17,90);
-            telemetry.addData("Beacon", getBeaconColor());
+            telemetry.addData("Beacon R", getBeaconColor_R());
             telemetry.addData("Debug", "Reading Beacon");
-            if(!colorIs(robot.BLUE)) {
+            if (colorIs(robot.COLOR_IS_RED) || colorIs(robot.COLOR_IS_BOTH) || colorIs(robot.COLOR_IS_NONE)) {
                 break;
             }
             if (i == 0)
                 sleepTau(5000);
         }
+
+        //Just got done with the first beacon
 
         telemetry.addData("Debug", "Turning");
         sleepTau(INTERIM_TIME);
@@ -161,11 +168,11 @@ public class Auto_RED extends LinearOpMode{
 
         sleepTau(INTERIM_TIME);
 
-        DriveBackwardsUntilLine(LINE_POWER,0);
+        DriveBackwardsUntilLine(LINE_POWER+0.1,0);
 
         sleepTau(INTERIM_TIME);
 
-        DriveStraightAbsolute(POWER, 0.13, 0);
+        DriveStraightAbsolute(POWER, 0.12, 0);
 
         sleepTau(INTERIM_TIME);
 
@@ -173,22 +180,32 @@ public class Auto_RED extends LinearOpMode{
 
         sleepTau(INTERIM_TIME);
 
-        for(int i = 0; i < 2; i++)
+        //THROWAWAY CODE
+        //TurnToAbsolute(-90);
+        //FlywheelsOn();
+        //sleepTau(5000);
+
+        for (int i = 0; i < 2; i++)
         {
             DriveStraightUntilProximity(POWER,90,0,1000);
             sleepTau(INTERIM_TIME);
             DriveStraightBackwards(POWER,0.17,90);
-            telemetry.addData("Beacon", getBeaconColor());
-            if(!colorIs(robot.BLUE)) {
+            telemetry.addData("Beacon R", getBeaconColor_R());
+            if (i == 0) {
+                DoubleShoot(); // takes 4 seconds
+            }
+            if (colorIs(robot.COLOR_IS_RED) || colorIs(robot.COLOR_IS_BOTH) || colorIs(robot.COLOR_IS_NONE)) {
+                sleepTau(INTERIM_TIME);
                 break;
             }
             if (i == 0)
-                sleepTau(5000);
+                sleepTau(1000); // sleep 1 more second to let beacon reset
         }
 
-        //sleepTau(INTERIM_TIME);
 
-        //ParkMid();
+        DriveStraightBackwards(FAST_POWER,2,90);
+
+        PistonStow();
     }
 
     //
@@ -236,7 +253,8 @@ public class Auto_RED extends LinearOpMode{
 
     //
     // getHeading() - Read the gyro, and convert the heading to our heading where 0 is forward,
-    //                negative is clockwise, and positive is counterclockwise.
+    //                negative is clockwise, and positive is counterclockwise. NOTE: returns from
+    //                -180 to 179. IMPORTANT: Don't compare to 180
     //
     public int getHeading() {
         int heading = robot.mrGyro.getHeading();
@@ -308,30 +326,47 @@ public class Auto_RED extends LinearOpMode{
     }
     public void FlywheelsOn()
     {
-        robot.flywheelMotorL.setPower(robot.FLYWHEEL_PWR);
-        robot.flywheelMotorL.setPower(robot.FLYWHEEL_PWR);
+        robot.flywheelMotorL.setPower(robot.FLYWHEEL_AUTO);
+        robot.flywheelMotorR.setPower(robot.FLYWHEEL_AUTO);
     }
     public void FlywheelsOff()
     {
         robot.flywheelMotorL.setPower(0);
-        robot.flywheelMotorL.setPower(0);
+        robot.flywheelMotorR.setPower(0);
     }
 
     public void Shoot()
     {
-        sleepTau(3000);
         robot.flyWheelPiston.setPosition(robot.PISTON_UP);
-        sleepTau(500);
+        sleepTau(1000);
         robot.flyWheelPiston.setPosition(robot.PISTON_DOWN);
     }
 
+    public void DoubleShoot()
+    {
+        robot.flyWheelPiston.setPosition(robot.PISTON_UP);
+        sleepTau(1000);
+        robot.flyWheelPiston.setPosition(robot.PISTON_DOWN);
+        sleepTau(3000);
+        robot.flyWheelPiston.setPosition(robot.PISTON_UP);
+    }
 
+    public void PistonStow()
+    {
+        robot.flyWheelPiston.setPosition(robot.PISTON_DOWN);
+    }
 
-    public int getBeaconColor(){
+    public int getBeaconColor_R(){
         //return 0;
         colorAcache = robot.colorAreader.read(0x04, 1);
         return colorAcache[0] & 0xFF;
     }
+    public int getBeaconColor_L(){
+        //return 0;
+        colorBcache = robot.colorBreader.read(0x04, 1);
+        return colorBcache[0] & 0xFF;
+    }
+
     public int getGroundColor(){
         colorCcache = robot.colorCreader.read(0x04,1);
         return colorCcache[0] & 0xFF;
@@ -356,7 +391,7 @@ public class Auto_RED extends LinearOpMode{
         telemetry.update();
 
         while (!foundLine && opModeIsActive()) {
-            int error = targetHeading - getHeading(); //positive error means need to go counterclockwise
+            int error = HeadingError(targetHeading); //positive error means need to go counterclockwise
             robot.leftMotor.setPower(Math.max(speed - error*ERROR_ADJUSTMENT, 0)); //don't go below 0
             robot.rightMotor.setPower(Math.min(speed + error*ERROR_ADJUSTMENT, 1)); //don't go above 1
 
@@ -392,7 +427,7 @@ public class Auto_RED extends LinearOpMode{
         telemetry.update();
 
         while (!foundLine && opModeIsActive()) {
-            int error = targetHeading - getHeading(); //positive error means need to go counterclockwise
+            int error = HeadingError(targetHeading); //positive error means need to go counterclockwise
             robot.leftMotor.setPower(-1*Math.min(speed + error*ERROR_ADJUSTMENT, 1)); //don't go below 0
             robot.rightMotor.setPower(-1*Math.max(speed - error*ERROR_ADJUSTMENT, 0)); //don't go above 1
 
@@ -432,7 +467,7 @@ public class Auto_RED extends LinearOpMode{
         telemetry.update();
 
         while (robot.leftMotor.getCurrentPosition()*LEFT_POLARITY < target_count && opModeIsActive()) {
-            int error = targetHeading - getHeading(); //positive error means need to go counterclockwise
+            int error = HeadingError(targetHeading); //positive error means need to go counterclockwise
             robot.leftMotor.setPower(-1*Math.min(speed + error*ERROR_ADJUSTMENT, 1)); //don't go below 0
             robot.rightMotor.setPower(-1*Math.max(speed - error*ERROR_ADJUSTMENT, 0)); //don't go above 1
             telemetry.addData("Gyro Heading Raw", robot.mrGyro.getHeading());
@@ -468,7 +503,7 @@ public class Auto_RED extends LinearOpMode{
         double startTime = runtime.milliseconds();
 
         while (getUltrasonicDistance() > distance && runtime.milliseconds() - startTime < timeoutMiliseconds && opModeIsActive()) {
-            int error = targetHeading - getHeading(); //positive error means need to go counterclockwise
+            int error = HeadingError(targetHeading); //positive error means need to go counterclockwise
             robot.leftMotor.setPower(Math.max(speed - error*ERROR_ADJUSTMENT, 0)); //don't go below 0
             robot.rightMotor.setPower(Math.min(speed + error*ERROR_ADJUSTMENT, 1)); //don't go above 1
             telemetry.addData("Gyro Heading Raw", robot.mrGyro.getHeading());
@@ -505,7 +540,7 @@ public class Auto_RED extends LinearOpMode{
         double startTime = runtime.milliseconds();
 
         while (getUltrasonicDistance() < distance && runtime.milliseconds() - startTime < timeoutMiliseconds && opModeIsActive()) {
-            int error = targetHeading - getHeading(); //positive error means need to go counterclockwise
+            int error = HeadingError(targetHeading); //positive error means need to go counterclockwise
             robot.leftMotor.setPower(-Math.min(speed + error*ERROR_ADJUSTMENT, 1)); //don't go below 0
             robot.rightMotor.setPower(-Math.max(speed - error*ERROR_ADJUSTMENT, 0)); //don't go above 1
             telemetry.addData("Gyro Heading Raw", robot.mrGyro.getHeading());
@@ -528,11 +563,64 @@ public class Auto_RED extends LinearOpMode{
         range1Cache = robot.RANGE1Reader.read(robot.RANGE1_REG_START, robot.RANGE1_READ_LENGTH);
         return range1Cache[1] & 0xFF;
     }
-    public boolean colorIs(int color)
+    public boolean colorIs(byte sensor, byte color)
     {
-        if (getBeaconColor() == color - 1 || getBeaconColor() == color || getBeaconColor() == color + 1)
-            return true;
-        else
-            return false;
+        int sensor_reading = (sensor == robot.LEFT_COLOR) ? getBeaconColor_L() : getBeaconColor_R();
+
+        if (color == robot.COLOR_IS_BLUE) {
+            return Math.abs(sensor_reading - robot.BLUE) <= 1;
+        } else if (color == robot.COLOR_IS_RED) {
+            return Math.abs(sensor_reading - robot.RED) <= 1;
+        } else if (color == robot.COLOR_IS_NONE) {
+            return !colorIs(sensor, robot.COLOR_IS_BLUE) && !colorIs(sensor, robot.COLOR_IS_RED);
+        }
+        return false;
+    }
+
+    public boolean colorIs(byte color)
+    {
+        if (color == robot.COLOR_IS_BOTH) {
+            return (colorIs(robot.LEFT_COLOR, robot.COLOR_IS_RED) && colorIs(robot.RIGHT_COLOR, robot.COLOR_IS_BLUE)) ||
+                    (colorIs(robot.RIGHT_COLOR, robot.COLOR_IS_RED) && colorIs(robot.LEFT_COLOR, robot.COLOR_IS_BLUE));
+        } else if (color == robot.COLOR_IS_RED) {
+            return !colorIs(robot.COLOR_IS_BOTH) &&
+                    (colorIs(robot.LEFT_COLOR, robot.COLOR_IS_RED) || colorIs(robot.RIGHT_COLOR, robot.COLOR_IS_RED));
+        } else if (color == robot.COLOR_IS_BLUE) {
+            return !colorIs(robot.COLOR_IS_BOTH) &&
+                    (colorIs(robot.LEFT_COLOR, robot.COLOR_IS_BLUE) || colorIs(robot.RIGHT_COLOR, robot.COLOR_IS_BLUE));
+        } else if (color == robot.COLOR_IS_NONE) {
+            return !colorIs(robot.COLOR_IS_BOTH) && !colorIs(robot.COLOR_IS_RED) && !colorIs(robot.COLOR_IS_BLUE);
+        }
+        return false;
+    }
+    //
+    // HeadingError(): Returns the number of degrees the target heading differs from the actual
+    //                 heading where positive means counterclockwise to correct. Examples:
+    //                 target	heading	error	return
+    //                  -100	100	    -200	160
+    //                   0	    -100	100	    100
+    //                  -100	0	   -100 	-100
+    //                    100	-100	200	-160
+    //                     -180	179	-359	1
+    //                     179	-180	359	-1
+    //                     0	0	0	0
+    //                     10	-10	20	20
+    //                     -10	10	-20	-20
+    //                     90	-90	180	180
+    //                     -90	90	-180	-180
+    //
+    //
+    public int HeadingError(int target)
+    {
+        int error = target - getHeading();
+
+        if (Math.abs(error) > 180)
+        {
+            if (error > 0)
+                error -= 360;
+            else
+                error += 360;
+        }
+        return error;
     }
 }

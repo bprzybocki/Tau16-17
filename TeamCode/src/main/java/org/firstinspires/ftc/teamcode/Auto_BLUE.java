@@ -91,6 +91,9 @@ public class Auto_BLUE extends LinearOpMode{
         //ModernRoboticsI2cGyro allows us to .getIntegratedZValue()
         waitForStart();
 
+        telemetry.addData("Beacon R", getBeaconColor_R());
+        telemetry.addData("Beacon L", getBeaconColor_L());
+
         //FlywheelsOn();
 
         //CODE TO KEEP!!!
@@ -108,23 +111,6 @@ public class Auto_BLUE extends LinearOpMode{
         DriveStraightAbsolute(FAST_POWER,2.8,-30);  //Drive halfway
 
         sleepTau(INTERIM_TIME);
-
-        TurnToAbsolute(-90);
-
-        //PART TWO OF CODE!!!
-
-        //THROWAWAY CODE
-        //TurnToAbsolute(-90);
-
-        sleepTau(INTERIM_TIME);
-
-        telemetry.addData("Debug", getHeading());
-
-        DriveStraightUntilProximity(POWER,-90,35,10000);    //Drive UNTIL 0.5 tiles to wall
-
-        sleepTau(INTERIM_TIME);
-
-        telemetry.addData("Debug", getHeading());
 
         TurnToAbsolute(0);
 
@@ -149,15 +135,22 @@ public class Auto_BLUE extends LinearOpMode{
             DriveStraightUntilProximity(POWER,-90,0,1000);
             telemetry.addData("Debug", "Driving Backwards");
             sleepTau(INTERIM_TIME);
-            DriveStraightBackwards(POWER,0.17,-90);
+            DriveBackwardsUntilProximity(POWER, -90, 15, 1000);
             telemetry.addData("Beacon R", getBeaconColor_R());
+            telemetry.addData("Beacon L", getBeaconColor_L());
             telemetry.addData("Debug", "Reading Beacon");
-            if(colorIs(robot.COLOR_IS_BLUE) || colorIs(robot.COLOR_IS_BOTH) || colorIs(robot.COLOR_IS_NONE)) {
+            if (colorIs(robot.COLOR_IS_BLUE) || colorIs(robot.COLOR_IS_BOTH) || colorIs(robot.COLOR_IS_NONE)) {
                 break;
             }
             if (i == 0)
                 sleepTau(5000);
         }
+
+        sleepTau(INTERIM_TIME);
+
+        DriveBackwardsUntilProximity(POWER, -90, 35, 1000);
+
+        //Just got done with the first beacon
 
         telemetry.addData("Debug", "Turning");
         sleepTau(INTERIM_TIME);
@@ -187,8 +180,9 @@ public class Auto_BLUE extends LinearOpMode{
         {
             DriveStraightUntilProximity(POWER,-90,0,1000);
             sleepTau(INTERIM_TIME);
-            DriveStraightBackwards(POWER,0.17,-90);
+            DriveBackwardsUntilProximity(POWER, -90, 15, 1000);
             telemetry.addData("Beacon R", getBeaconColor_R());
+            telemetry.addData("Beacon L", getBeaconColor_L());
             if (i == 0) {
                 DoubleShoot(); // takes 4 seconds
             }
@@ -200,14 +194,11 @@ public class Auto_BLUE extends LinearOpMode{
                 sleepTau(1000); // sleep 1 more second to let beacon reset
         }
 
+        sleepTau(INTERIM_TIME);
 
         DriveStraightBackwards(FAST_POWER,2,-90);
 
         PistonStow();
-
-        //sleepTau(INTERIM_TIME);
-
-        //ParkMid();
     }
 
     //
@@ -255,7 +246,8 @@ public class Auto_BLUE extends LinearOpMode{
 
     //
     // getHeading() - Read the gyro, and convert the heading to our heading where 0 is forward,
-    //                negative is clockwise, and positive is counterclockwise.
+    //                negative is clockwise, and positive is counterclockwise. NOTE: returns from
+    //                -180 to 179. IMPORTANT: Don't compare to 180
     //
     public int getHeading() {
         int heading = robot.mrGyro.getHeading();
@@ -274,7 +266,7 @@ public class Auto_BLUE extends LinearOpMode{
         int heading = getHeading();  //Set variables to gyro readings
         //double SPD_ADJUSTMENT = 0.006;
         int diff = Math.abs(heading - target);
-        int THRESHOLD = 14;
+        int THRESHOLD = 20;
 
         while (diff > THRESHOLD && opModeIsActive()) {  //Continue while the robot direction is further than three degrees from the target
             if (heading > target) {  //if gyro is positive, we will turn right
@@ -283,8 +275,8 @@ public class Auto_BLUE extends LinearOpMode{
             }
 
             if (heading < target) {  //if gyro is positive, we will turn left
-                robot.leftMotor.setPower(-0.4); //counterclockwise
-                robot.rightMotor.setPower(0.4);
+                robot.leftMotor.setPower(-0.39); //counterclockwise
+                robot.rightMotor.setPower(0.39);
             }
 
             heading = getHeading();  //Set variables to gyro readings
@@ -392,7 +384,7 @@ public class Auto_BLUE extends LinearOpMode{
         telemetry.update();
 
         while (!foundLine && opModeIsActive()) {
-            int error = targetHeading - getHeading(); //positive error means need to go counterclockwise
+            int error = HeadingError(targetHeading); //positive error means need to go counterclockwise
             robot.leftMotor.setPower(Math.max(speed - error*ERROR_ADJUSTMENT, 0)); //don't go below 0
             robot.rightMotor.setPower(Math.min(speed + error*ERROR_ADJUSTMENT, 1)); //don't go above 1
 
@@ -428,7 +420,7 @@ public class Auto_BLUE extends LinearOpMode{
         telemetry.update();
 
         while (!foundLine && opModeIsActive()) {
-            int error = targetHeading - getHeading(); //positive error means need to go counterclockwise
+            int error = HeadingError(targetHeading); //positive error means need to go counterclockwise
             robot.leftMotor.setPower(-1*Math.min(speed + error*ERROR_ADJUSTMENT, 1)); //don't go below 0
             robot.rightMotor.setPower(-1*Math.max(speed - error*ERROR_ADJUSTMENT, 0)); //don't go above 1
 
@@ -468,7 +460,7 @@ public class Auto_BLUE extends LinearOpMode{
         telemetry.update();
 
         while (robot.leftMotor.getCurrentPosition()*LEFT_POLARITY < target_count && opModeIsActive()) {
-            int error = targetHeading - getHeading(); //positive error means need to go counterclockwise
+            int error = HeadingError(targetHeading); //positive error means need to go counterclockwise
             robot.leftMotor.setPower(-1*Math.min(speed + error*ERROR_ADJUSTMENT, 1)); //don't go below 0
             robot.rightMotor.setPower(-1*Math.max(speed - error*ERROR_ADJUSTMENT, 0)); //don't go above 1
             telemetry.addData("Gyro Heading Raw", robot.mrGyro.getHeading());
@@ -504,7 +496,7 @@ public class Auto_BLUE extends LinearOpMode{
         double startTime = runtime.milliseconds();
 
         while (getUltrasonicDistance() > distance && runtime.milliseconds() - startTime < timeoutMiliseconds && opModeIsActive()) {
-            int error = targetHeading - getHeading(); //positive error means need to go counterclockwise
+            int error = HeadingError(targetHeading); //positive error means need to go counterclockwise
             robot.leftMotor.setPower(Math.max(speed - error*ERROR_ADJUSTMENT, 0)); //don't go below 0
             robot.rightMotor.setPower(Math.min(speed + error*ERROR_ADJUSTMENT, 1)); //don't go above 1
             telemetry.addData("Gyro Heading Raw", robot.mrGyro.getHeading());
@@ -541,7 +533,7 @@ public class Auto_BLUE extends LinearOpMode{
         double startTime = runtime.milliseconds();
 
         while (getUltrasonicDistance() < distance && runtime.milliseconds() - startTime < timeoutMiliseconds && opModeIsActive()) {
-            int error = targetHeading - getHeading(); //positive error means need to go counterclockwise
+            int error = HeadingError(targetHeading); //positive error means need to go counterclockwise
             robot.leftMotor.setPower(-Math.min(speed + error*ERROR_ADJUSTMENT, 1)); //don't go below 0
             robot.rightMotor.setPower(-Math.max(speed - error*ERROR_ADJUSTMENT, 0)); //don't go above 1
             telemetry.addData("Gyro Heading Raw", robot.mrGyro.getHeading());
@@ -593,5 +585,35 @@ public class Auto_BLUE extends LinearOpMode{
             return !colorIs(robot.COLOR_IS_BOTH) && !colorIs(robot.COLOR_IS_RED) && !colorIs(robot.COLOR_IS_BLUE);
         }
         return false;
+    }
+    //
+    // HeadingError(): Returns the number of degrees the target heading differs from the actual
+    //                 heading where positive means counterclockwise to correct. Examples:
+    //                 target	heading	error	return
+    //                  -100	100	    -200	160
+    //                   0	    -100	100	    100
+    //                  -100	0	   -100 	-100
+    //                    100	-100	200	-160
+    //                     -180	179	-359	1
+    //                     179	-180	359	-1
+    //                     0	0	0	0
+    //                     10	-10	20	20
+    //                     -10	10	-20	-20
+    //                     90	-90	180	180
+    //                     -90	90	-180	-180
+    //
+    //
+    public int HeadingError(int target)
+    {
+        int error = target - getHeading();
+
+        if (Math.abs(error) > 180)
+        {
+            if (error > 0)
+                error -= 360;
+            else
+                error += 360;
+        }
+        return error;
     }
 }
