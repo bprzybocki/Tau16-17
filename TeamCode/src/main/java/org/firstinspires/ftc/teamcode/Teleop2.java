@@ -26,6 +26,7 @@ public class Teleop2 extends OpMode {
     boolean isRightStopped = true;
     boolean flywheelOn = false;
     double currentRPM = 0;
+    double servoTime;
 
     // Controller layout
     //  Y
@@ -155,8 +156,9 @@ public class Teleop2 extends OpMode {
 
         if (gamepad2.x) {
             robot.flyWheelPiston.setPosition(robot.PISTON_UP);
+            servoTime = robot.getTime();
         }
-        else {
+        if (robot.getTime() >= servoTime + 0.5) {
             robot.flyWheelPiston.setPosition(robot.PISTON_DOWN);
         }
 
