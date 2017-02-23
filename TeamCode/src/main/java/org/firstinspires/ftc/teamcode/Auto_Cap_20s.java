@@ -3,23 +3,17 @@ package org.firstinspires.ftc.teamcode;
 /**
  * Created by BobChuckyJoe on 1/30/2017.
  */
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.ColorSensor;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.GyroSensor;
-import com.qualcomm.robotcore.util.ElapsedTime;
+
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
-import com.qualcomm.robotcore.util.Range;
-import com.qualcomm.robotcore.hardware.LightSensor;
-import com.qualcomm.robotcore.hardware.I2cAddr;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.I2cDevice;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
-import com.qualcomm.robotcore.hardware.I2cDeviceSynchImpl;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
-@Autonomous(name = "Full Blue", group = "Tau")
-public class Auto_BLUE extends LinearOpMode{
+@Autonomous(name = "Auto Cap 20s", group = "Tau")
+public class Auto_Cap_20s extends LinearOpMode{
     /* Declare OpMode members. */
     Hardware robot = new Hardware();
     private ElapsedTime runtime = new ElapsedTime();
@@ -91,114 +85,25 @@ public class Auto_BLUE extends LinearOpMode{
         //ModernRoboticsI2cGyro allows us to .getIntegratedZValue()
         waitForStart();
 
-        telemetry.addData("Beacon R", getBeaconColor_R());
-        telemetry.addData("Beacon L", getBeaconColor_L());
+        sleepTau(20000);
 
-        //FlywheelsOn();
-
-        //CODE TO KEEP!!!
-        DriveStraightAbsolute(FAST_POWER,0.4,0);       //Speed of FULL POWER(1.0), One tile forward
-        //Shoot();
-        //Shoot();
-        //FlywheelsOff();
-        //0 is forward, negative degrees is Clockwise, positive is COUNTERCLOCKWISE
-        sleepTau(INTERIM_TIME);
-
-        TurnToAbsolute(-30);
+        DriveStraightBackwards(POWER,1.1,0);
 
         sleepTau(INTERIM_TIME);
 
-        DriveStraightAbsolute(FAST_POWER,2.8,-30);  //Drive halfway
+        DoubleShoot();
 
         sleepTau(INTERIM_TIME);
 
-        TurnToAbsolute(0);
+        TurnToAbsolute(-180);
 
         sleepTau(INTERIM_TIME);
 
-        DriveStraightUntilLine(LINE_POWER, 0);
-
-        sleepTau(INTERIM_TIME);
-
-        DriveStraightBackwards(POWER, 0.07, 0);
-
-        sleepTau(INTERIM_TIME);
-
-        TurnToAbsolute(-90);
-
-        sleepTau(INTERIM_TIME);
-
-        FlywheelsOn();
-
-        for(int i = 0; i < 2; i++)
-        {
-            DriveStraightUntilProximity(POWER,-90,0,1000);
-            telemetry.addData("Debug", "Driving Backwards");
-            sleepTau(INTERIM_TIME);
-            DriveBackwardsUntilProximity(POWER, -90, 15, 1000);
-            telemetry.addData("Beacon R", getBeaconColor_R());
-            telemetry.addData("Beacon L", getBeaconColor_L());
-            telemetry.addData("Debug", "Reading Beacon");
-            if (colorIs(robot.COLOR_IS_BLUE) || colorIs(robot.COLOR_IS_BOTH) || colorIs(robot.COLOR_IS_NONE)) {
-                break;
-            }
-            if (i == 0)
-                sleepTau(5000);
-        }
-
-        sleepTau(INTERIM_TIME);
-
-        DriveBackwardsUntilProximity(POWER, -90, 35, 1000);
-
-        //Just got done with the first beacon
-
-        telemetry.addData("Debug", "Turning");
-        sleepTau(INTERIM_TIME);
-
-        TurnToAbsolute(0);
-
-        sleepTau(INTERIM_TIME);
-
-        DriveBackwardsUntilLine(LINE_POWER+0.1,0);
-
-        sleepTau(INTERIM_TIME);
-
-        DriveStraightAbsolute(POWER, 0.12, 0);
-
-        sleepTau(INTERIM_TIME);
-
-        TurnToAbsolute(-90);
-
-        sleepTau(INTERIM_TIME);
-
-        //THROWAWAY CODE
-        //TurnToAbsolute(-90);
-        //FlywheelsOn();
-        //sleepTau(5000);
-
-        for (int i = 0; i < 2; i++)
-        {
-            DriveStraightUntilProximity(POWER,-90,0,1000);
-            sleepTau(INTERIM_TIME);
-            DriveBackwardsUntilProximity(POWER, -90, 15, 1000);
-            telemetry.addData("Beacon R", getBeaconColor_R());
-            telemetry.addData("Beacon L", getBeaconColor_L());
-            if (i == 0) {
-                DoubleShoot(); // takes 4 seconds
-            }
-            if (colorIs(robot.COLOR_IS_BLUE) || colorIs(robot.COLOR_IS_BOTH) || colorIs(robot.COLOR_IS_NONE)) {
-                sleepTau(INTERIM_TIME);
-                break;
-            }
-            if (i == 0)
-                sleepTau(1000); // sleep 1 more second to let beacon reset
-        }
-
-        sleepTau(INTERIM_TIME);
-
-        DriveStraightBackwards(FAST_POWER,2,-90);
+        DriveStraightAbsolute(POWER,1.5,0);
 
         PistonStow();
+
+        //DriveStraightAbsolute(0.4,2.5,0);
     }
 
     //

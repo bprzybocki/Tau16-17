@@ -153,8 +153,8 @@ public class Hardware {
         intakeMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         //intakeMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        flywheelMotorL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        flywheelMotorR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        flywheelMotorL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        flywheelMotorR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         // Define and initialize ALL installed servos.
         flyWheelPiston = hwMap.servo.get("fly_piston");
         flyWheelPiston.setPosition(PISTON_DOWN);
