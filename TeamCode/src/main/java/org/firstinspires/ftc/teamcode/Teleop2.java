@@ -27,22 +27,23 @@ public class Teleop2 extends OpMode {
     boolean flywheelOn = false;
     double currentRPM = 0;
     double servoTime;
+    double flywheelTime;
 
     // Controller layout
     //  Y
     // X  B
     //  A
 
-/*
-    @Override
-    public void runOpMode() throws InterruptedException {
-        myInit();
-        waitForStart();
-        while (opModeIsActive()){
-            myLoop();
+    /*
+        @Override
+        public void runOpMode() throws InterruptedException {
+            myInit();
+            waitForStart();
+            while (opModeIsActive()){
+                myLoop();
+            }
         }
-    }
-*/
+    */
     @Override
     public void init() {
         /* Initialize the hardware variables.
@@ -55,9 +56,6 @@ public class Teleop2 extends OpMode {
         updateTelemetry(telemetry);
         //robot.buttonSensorL.enableLed(true);
         //robot.buttonSensorR.enableLed(true);
-
-        robot.leftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        robot.rightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         //robot.flywheelMotorL.setMaxSpeed(robot.FLYWHEEL_SPD);
         //robot.flywheelMotorL.setMaxSpeed(robot.FLYWHEEL_SPD);
@@ -106,8 +104,8 @@ public class Teleop2 extends OpMode {
         telemetry.update();
 
         leftGP1 = -gamepad1.left_stick_y;
-
         rightGP1 = -gamepad1.right_stick_y;
+
         leftGP2 = -gamepad2.left_stick_y;
 
         if(Math.abs(leftGP1) < 0.05) {
@@ -141,8 +139,8 @@ public class Teleop2 extends OpMode {
             isRightStopped = false;
         }
 */
-        robot.leftMotor.setPower(0.35*leftGP1); //0.45
-        robot.rightMotor.setPower(0.35*rightGP1);
+        robot.leftMotor.setPower(0.65*leftGP1); //0.45
+        robot.rightMotor.setPower(0.65*rightGP1);
 
         if (gamepad2.right_trigger > 0.0) {
             robot.flywheelMotorL.setPower(robot.FLYWHEEL_PWR);
@@ -160,15 +158,18 @@ public class Teleop2 extends OpMode {
             robot.flyWheelPiston.setPosition(robot.PISTON_DOWN);
         }
 
-        if (gamepad1.x) {
-            robot.buttonMotor.setPower(1.0);
-        }
-        else if (gamepad1.b) {
-            robot.buttonMotor.setPower(-1.0);
-        }
-        else {
-            robot.buttonMotor.setPower(0.0);
-        }
+        /*if (gamepad2.b && robot.getTime() >= flywheelTime + 0.5) {
+            flywheelTime = robot.getTime();
+            if (flywheelOn) {
+                robot.flywheelMotorL.setPower(0);
+                robot.flywheelMotorR.setPower(0);
+                flywheelOn = false;
+            } else {
+                robot.flywheelMotorL.setPower(robot.FLYWHEEL_PWR);
+                robot.flywheelMotorR.setPower(robot.FLYWHEEL_PWR);
+                flywheelOn = true;
+            }
+        }*/
 
         if (gamepad2.right_bumper)
         {

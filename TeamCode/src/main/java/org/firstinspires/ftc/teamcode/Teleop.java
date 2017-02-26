@@ -35,16 +35,16 @@ public class Teleop extends OpMode {
     // X  B
     //  A
 
-/*
-    @Override
-    public void runOpMode() throws InterruptedException {
-        myInit();
-        waitForStart();
-        while (opModeIsActive()){
-            myLoop();
+    /*
+        @Override
+        public void runOpMode() throws InterruptedException {
+            myInit();
+            waitForStart();
+            while (opModeIsActive()){
+                myLoop();
+            }
         }
-    }
-*/
+    */
     @Override
     public void init() {
         /* Initialize the hardware variables.

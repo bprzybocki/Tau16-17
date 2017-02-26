@@ -18,7 +18,7 @@ import com.qualcomm.robotcore.hardware.I2cDevice;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynchImpl;
 
-@Autonomous(name = "Full Red", group = "Tau")
+@Autonomous(name = "Fuller Red", group = "Tau")
 public class Auto_RED extends LinearOpMode{
     /* Declare OpMode members. */
     Hardware robot = new Hardware();
@@ -91,6 +91,9 @@ public class Auto_RED extends LinearOpMode{
         //ModernRoboticsI2cGyro allows us to .getIntegratedZValue()
         waitForStart();
 
+        telemetry.addData("Beacon R", getBeaconColor_R());
+        telemetry.addData("Beacon L", getBeaconColor_L());
+
         //FlywheelsOn();
 
         //CODE TO KEEP!!!
@@ -108,23 +111,6 @@ public class Auto_RED extends LinearOpMode{
         DriveStraightAbsolute(FAST_POWER,2.8,30);  //Drive halfway
 
         sleepTau(INTERIM_TIME);
-
-        TurnToAbsolute(90);
-
-        //PART TWO OF CODE!!!
-
-        //THROWAWAY CODE
-        //TurnToAbsolute(-90);
-
-        sleepTau(INTERIM_TIME);
-
-        telemetry.addData("Debug", getHeading());
-
-        DriveStraightUntilProximity(POWER,90,35,10000);    //Drive UNTIL 0.5 tiles to wall
-
-        sleepTau(INTERIM_TIME);
-
-        telemetry.addData("Debug", getHeading());
 
         TurnToAbsolute(0);
 
@@ -149,8 +135,9 @@ public class Auto_RED extends LinearOpMode{
             DriveStraightUntilProximity(POWER,90,0,1000);
             telemetry.addData("Debug", "Driving Backwards");
             sleepTau(INTERIM_TIME);
-            DriveStraightBackwards(POWER,0.17,90);
+            DriveBackwardsUntilProximity(POWER, 90, 15, 1000);
             telemetry.addData("Beacon R", getBeaconColor_R());
+            telemetry.addData("Beacon L", getBeaconColor_L());
             telemetry.addData("Debug", "Reading Beacon");
             if (colorIs(robot.COLOR_IS_RED) || colorIs(robot.COLOR_IS_BOTH) || colorIs(robot.COLOR_IS_NONE)) {
                 break;
@@ -158,6 +145,10 @@ public class Auto_RED extends LinearOpMode{
             if (i == 0)
                 sleepTau(5000);
         }
+
+        sleepTau(INTERIM_TIME);
+
+        DriveBackwardsUntilProximity(POWER, 90, 35, 1000);
 
         //Just got done with the first beacon
 
@@ -189,8 +180,9 @@ public class Auto_RED extends LinearOpMode{
         {
             DriveStraightUntilProximity(POWER,90,0,1000);
             sleepTau(INTERIM_TIME);
-            DriveStraightBackwards(POWER,0.17,90);
+            DriveBackwardsUntilProximity(POWER, 90, 15, 1000);
             telemetry.addData("Beacon R", getBeaconColor_R());
+            telemetry.addData("Beacon L", getBeaconColor_L());
             if (i == 0) {
                 DoubleShoot(); // takes 4 seconds
             }
@@ -202,6 +194,7 @@ public class Auto_RED extends LinearOpMode{
                 sleepTau(1000); // sleep 1 more second to let beacon reset
         }
 
+        sleepTau(INTERIM_TIME);
 
         DriveStraightBackwards(FAST_POWER,2,90);
 
@@ -221,9 +214,9 @@ public class Auto_RED extends LinearOpMode{
         robot.leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         robot.rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        int TICKS_PER_TILE = 1900;           // number of encoder ticks per tile
+        int TICKS_PER_TILE = 2000;           // number of encoder ticks per tile
         double ERROR_ADJUSTMENT = 0.035;     // motor power adjustment per degree off of straight
-        int LEFT_POLARITY = -1;     // encoder for the REV motors goes negative when moving forward
+        int LEFT_POLARITY = 1;     // encoder for the REV motors goes negative when moving forward
         //    may need to set to 1 for a different motor/encoder to keep
         //    the encoder values always positive for a forward move
 
@@ -273,17 +266,20 @@ public class Auto_RED extends LinearOpMode{
         int heading = getHeading();  //Set variables to gyro readings
         //double SPD_ADJUSTMENT = 0.006;
         int diff = Math.abs(heading - target);
-        int THRESHOLD = 14;
+        int THRESHOLD = 30;
+
+        if (Math.abs(target) == 30)
+            THRESHOLD = 20;
 
         while (diff > THRESHOLD && opModeIsActive()) {  //Continue while the robot direction is further than three degrees from the target
             if (heading > target) {  //if gyro is positive, we will turn right
-                robot.leftMotor.setPower(0.4);
-                robot.rightMotor.setPower(-0.4); //clockwise (slower, needs higher power)
+                robot.leftMotor.setPower(0.42);
+                robot.rightMotor.setPower(-0.42); //clockwise (slower, needs higher power)
             }
 
             if (heading < target) {  //if gyro is positive, we will turn left
-                robot.leftMotor.setPower(-0.4); //counterclockwise
-                robot.rightMotor.setPower(0.4);
+                robot.leftMotor.setPower(-0.39); //counterclockwise
+                robot.rightMotor.setPower(0.39);
             }
 
             heading = getHeading();  //Set variables to gyro readings
@@ -347,7 +343,7 @@ public class Auto_RED extends LinearOpMode{
         robot.flyWheelPiston.setPosition(robot.PISTON_UP);
         sleepTau(1000);
         robot.flyWheelPiston.setPosition(robot.PISTON_DOWN);
-        sleepTau(3000);
+        sleepTau(1000);
         robot.flyWheelPiston.setPosition(robot.PISTON_UP);
     }
 
@@ -380,7 +376,7 @@ public class Auto_RED extends LinearOpMode{
 
         boolean foundLine = false;
         double ERROR_ADJUSTMENT = 0.035;     // motor power adjustment per degree off of straight
-        int LEFT_POLARITY = -1;     // encoder for the REV motors goes negative when moving forward
+        int LEFT_POLARITY = 1;     // encoder for the REV motors goes negative when moving forward
         //    may need to set to 1 for a different motor/encoder to keep
         //    the encoder values always positive for a forward move
 
@@ -416,7 +412,7 @@ public class Auto_RED extends LinearOpMode{
 
         boolean foundLine = false;
         double ERROR_ADJUSTMENT = 0.035;     // motor power adjustment per degree off of straight
-        int LEFT_POLARITY = -1;     // encoder for the REV motors goes negative when moving forward
+        int LEFT_POLARITY = 1;     // encoder for the REV motors goes negative when moving forward
         //    may need to set to 1 for a different motor/encoder to keep
         //    the encoder values always positive for a forward move
 
@@ -452,7 +448,7 @@ public class Auto_RED extends LinearOpMode{
         robot.leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         robot.rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        int TICKS_PER_TILE = 1900;           // number of encoder ticks per tile
+        int TICKS_PER_TILE = 2000;           // number of encoder ticks per tile
         double ERROR_ADJUSTMENT = 0.035;     // motor power adjustment per degree off of straight
         int LEFT_POLARITY = 1;     // encoder for the REV motors goes negative when moving forward
         //    may need to set to 1 for a different motor/encoder to keep
@@ -488,9 +484,9 @@ public class Auto_RED extends LinearOpMode{
         robot.leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         robot.rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        int TICKS_PER_TILE = 1900;           // number of encoder ticks per tile
+        int TICKS_PER_TILE = 2000;           // number of encoder ticks per tile
         double ERROR_ADJUSTMENT = 0.035;     // motor power adjustment per degree off of straight
-        int LEFT_POLARITY = -1;     // encoder for the REV motors goes negative when moving forward
+        int LEFT_POLARITY = 1;     // encoder for the REV motors goes negative when moving forward
         //    may need to set to 1 for a different motor/encoder to keep
         //    the encoder values always positive for a forward move
 
@@ -525,9 +521,9 @@ public class Auto_RED extends LinearOpMode{
         robot.leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         robot.rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        int TICKS_PER_TILE = 1900;           // number of encoder ticks per tile
+        int TICKS_PER_TILE = 2000;           // number of encoder ticks per tile
         double ERROR_ADJUSTMENT = 0.035;     // motor power adjustment per degree off of straight
-        int LEFT_POLARITY = -1;     // encoder for the REV motors goes negative when moving forward
+        int LEFT_POLARITY = 1;     // encoder for the REV motors goes negative when moving forward
         //    may need to set to 1 for a different motor/encoder to keep
         //    the encoder values always positive for a forward move
 

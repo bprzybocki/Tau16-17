@@ -3,27 +3,22 @@ package org.firstinspires.ftc.teamcode;
 /**
  * Created by BobChuckyJoe on 1/30/2017.
  */
+
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.GyroSensor;
-import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
-import com.qualcomm.robotcore.util.Range;
-import com.qualcomm.robotcore.hardware.LightSensor;
-import com.qualcomm.robotcore.hardware.I2cAddr;
 import com.qualcomm.robotcore.hardware.I2cDevice;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
-import com.qualcomm.robotcore.hardware.I2cDeviceSynchImpl;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
-@Autonomous(name = "Auto Test", group = "Tau")
-public class Auto_Test extends LinearOpMode{
+@Autonomous(name = "Auto Shoot Straight", group = "Tau")
+public class Auto_Shoot_Straight extends LinearOpMode{
     /* Declare OpMode members. */
     Hardware robot = new Hardware();
     private ElapsedTime runtime = new ElapsedTime();
-    boolean changed = false;
+
     static final double COUNTS_PER_MOTOR_REV  = 1440;
     static final double DRIVE_GEAR_REDUCTION  = 1.0 / 3;
     static final double WHEEL_DIAMETER_INCHES = 4.0;
@@ -31,22 +26,10 @@ public class Auto_Test extends LinearOpMode{
     static final double DRIVE_SPEED           = 0.6;
     static final double TURN_SPEED            = 0.5;
     static final double ERROR  = 1.5;
-    static final int INTERIM_TIME = 2000;
+    static final int INTERIM_TIME = 100;
     static final double FAST_POWER = 0.5;
     static final double POWER = 0.40;
     static final double LINE_POWER = 0.2; // Slower because we don't want to miss line
-
-    static final double robotDiameter = 15.25; // inches between center of right and left wheels
-    static final double robotCircumferance = robotDiameter*Math.PI;
-    static final double wheelCircumferance = WHEEL_DIAMETER_INCHES*Math.PI;
-    static final int leftTicksPerRotation = 1060;
-    static final int rightTicksPerRotation = 650;
-    static final int leftPolarity = 1;
-    static final int rightPolarity = 1;
-    static final double turnToleranceProportion = 0.1;
-    static final double driveToleranceProportion = 0.15;
-    static final double tileInches = 23.5;
-
 
     static byte[] colorAcache;
     static byte[] colorBcache;
@@ -103,29 +86,25 @@ public class Auto_Test extends LinearOpMode{
         //ModernRoboticsI2cGyro allows us to .getIntegratedZValue()
         waitForStart();
 
-        //DriveStraightAbsolute2(1,0);
+        FlywheelsOn();
 
-        //sleepTau(INTERIM_TIME);
+        sleepTau(5000);
 
-        //DriveStraightAbsolute2(2,0);
+        DriveStraightBackwards(POWER,0.6,0);
 
-        /*TurnToAbsolute2(90);
-        sleepTau(INTERIM_TIME);
-        TurnToAbsolute2(0);
-        sleepTau(INTERIM_TIME);
-        TurnToAbsolute2(-90);
-        sleepTau(INTERIM_TIME);
-        TurnToAbsolute2(0);
         sleepTau(INTERIM_TIME);
 
-        TurnToAbsolute2(30);
-        sleepTau(INTERIM_TIME);
-        TurnToAbsolute2(0);
-        sleepTau(INTERIM_TIME);
-        TurnToAbsolute2(-30);
-        sleepTau(INTERIM_TIME);
-        TurnToAbsolute2(0);
-        sleepTau(INTERIM_TIME);*/
+        DoubleShoot();
+
+        sleepTau(1500);
+
+        FlywheelsOff();
+
+        sleepTau(INTERIM_TIME*2);
+
+        PistonStow();
+
+        sleepTau(1500); // Stops program from terminating to allow piston to stow
     }
 
     //
@@ -270,7 +249,7 @@ public class Auto_Test extends LinearOpMode{
         robot.flyWheelPiston.setPosition(robot.PISTON_UP);
         sleepTau(1000);
         robot.flyWheelPiston.setPosition(robot.PISTON_DOWN);
-        sleepTau(1000);
+        sleepTau(5000);
         robot.flyWheelPiston.setPosition(robot.PISTON_UP);
     }
 
@@ -377,7 +356,7 @@ public class Auto_Test extends LinearOpMode{
 
         int TICKS_PER_TILE = 2000;           // number of encoder ticks per tile
         double ERROR_ADJUSTMENT = 0.035;     // motor power adjustment per degree off of straight
-        int LEFT_POLARITY = 1;     // encoder for the REV motors goes negative when moving forward
+        int LEFT_POLARITY = -1;     // encoder for the REV motors goes negative when moving forward
         //    may need to set to 1 for a different motor/encoder to keep
         //    the encoder values always positive for a forward move
 
@@ -545,216 +524,5 @@ public class Auto_Test extends LinearOpMode{
                 error += 360;
         }
         return error;
-    }
-
-    public void TurnToAbsolute2(int target)
-    {
-        robot.leftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        robot.rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        target = HeadingError(target);
-
-        telemetry.addData("New Target", target);
-        telemetry.update();
-
-        double proportionOfCircle = ((double)target)/360;
-        double rotations = proportionOfCircle*robotCircumferance/wheelCircumferance;
-        int leftTicks = (int)(Math.abs(rotations)*leftTicksPerRotation);
-        int rightTicks = (int)(Math.abs(rotations)*rightTicksPerRotation);
-        int rightDirection = (rotations < 0) ? -1 : 1;
-        int leftDirection = -rightDirection;
-        double leftMinimumPower = 0.28;
-        double rightMinimumPower = 0.2;
-        double leftMaxIncrementPower = 0.7-leftMinimumPower;
-        double rightMaxIncrementPower = 0.7-rightMinimumPower;
-
-        while (opModeIsActive())
-        {
-            int leftCurrentTicks = Math.abs(robot.leftMotor.getCurrentPosition());
-            int rightCurrentTicks = Math.abs(robot.rightMotor.getCurrentPosition());
-            telemetry.addData("Left Ticks", leftCurrentTicks);
-            telemetry.addData("Right Ticks", rightCurrentTicks);
-            telemetry.update();
-
-            double leftProportion = ((double)leftCurrentTicks) / leftTicks;
-            double rightProportion = ((double)rightCurrentTicks) / rightTicks;
-
-            if (leftProportion > 1 - turnToleranceProportion || rightProportion > 1 - turnToleranceProportion) {
-                break;
-            }
-
-            robot.leftMotor.setPower((leftMinimumPower+(1-leftProportion)*leftMaxIncrementPower)*leftDirection*leftPolarity);
-            robot.rightMotor.setPower((rightMinimumPower+(1-rightProportion)*rightMaxIncrementPower)*rightDirection*rightPolarity);
-        }
-        robot.leftMotor.setPower(0);
-        robot.rightMotor.setPower(0);
-    }
-
-    public void DriveAbsolute2(double speed, double tiles, int target, int dir)
-    {
-        tiles = Math.abs(tiles);
-        robot.leftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        robot.rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        /*target = HeadingError(target);
-
-        telemetry.addData("New Target", target);
-        telemetry.update();*/
-
-        double leftMinimumPower = 0.28;
-        double rightMinimumPower = 0.2;
-        double leftMaxIncrementPower = 0.7-leftMinimumPower;
-        double rightMaxIncrementPower = 0.7-rightMinimumPower;
-
-        int leftTicks = (int)(tileInches/wheelCircumferance*leftTicksPerRotation*tiles);
-        int rightTicks = (int)(tileInches/wheelCircumferance*rightTicksPerRotation*tiles);
-
-        while(opModeIsActive())
-        {
-            int leftCurrentTicks = Math.abs(robot.leftMotor.getCurrentPosition());
-            int rightCurrentTicks = Math.abs(robot.rightMotor.getCurrentPosition());
-
-            telemetry.addData("Left Ticks", leftCurrentTicks);
-            telemetry.addData("Right Ticks", rightCurrentTicks);
-            telemetry.update();
-
-            double leftProportion = ((double)leftCurrentTicks) / leftTicks;
-            double rightProportion = ((double)rightCurrentTicks) / rightTicks;
-            telemetry.addData("Left Prop", leftProportion);
-            telemetry.addData("Right Prop", rightProportion);
-            telemetry.update();
-
-
-            if (leftProportion > 1 - driveToleranceProportion || rightProportion > 1 - driveToleranceProportion) {
-                break;
-            }
-
-            robot.leftMotor.setPower(dir*(leftMinimumPower+(1-leftProportion)*leftMaxIncrementPower)*leftPolarity);
-            robot.rightMotor.setPower(dir*(rightMinimumPower+(1-rightProportion)*rightMaxIncrementPower)*rightPolarity);
-        }
-        robot.leftMotor.setPower(0);
-        robot.rightMotor.setPower(0);
-    }
-
-    public void DriveBackwardsAbsolute2(double speed, double tiles, int target)
-    {
-        DriveAbsolute2(speed, tiles, target, -1);
-    }
-    public void DriveStraightAbsolute2(double speed, double tiles, int target)
-    {
-        DriveAbsolute2(speed, tiles, target, 1);
-    }
-
-    //
-    // DriveProximity2(): Drive forward until a given distance is reached from the front ultrasonic
-    //                    sensor. Speed and heading don't work yet. Distance is measured in
-    //                    ticks.
-    //
-    public void DriveProximity2(double speed, int heading, int distance)
-    {
-        robot.leftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        robot.rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        double leftMinimumPower = 0.28;
-        double rightMinimumPower = 0.2;
-        double leftMaxPower = 0.7;
-        double rightMaxPower = 0.7;
-        double leftMidPower = (leftMinimumPower+leftMaxPower)/2;
-        double rightMidPower = (rightMinimumPower+rightMaxPower)/2;
-        double leftDelta = leftMidPower-leftMinimumPower;
-        double rightDelta = rightMidPower-rightMinimumPower;
-
-        while(opModeIsActive())
-        {
-            int leftCurrentTicks = Math.abs(robot.leftMotor.getCurrentPosition());
-            int rightCurrentTicks = Math.abs(robot.rightMotor.getCurrentPosition());
-
-            double leftCurrentRotations = ((double)leftCurrentTicks)/leftTicksPerRotation;
-            double rightCurrentRotations = ((double)rightCurrentTicks)/rightTicksPerRotation;
-
-            telemetry.addData("Left Rotations", leftCurrentRotations);
-            telemetry.addData("Right Rotations", rightCurrentRotations);
-            telemetry.update();
-
-            // steeringProportion is a ration between the left rotations divided by right rotations
-            // 1 means we are going straight
-            // <1 means left is going too slow or right is going too fast
-            // >1 means right is going too slow or left is going too fast
-            // if steering proportion is above 1.5 (or below 0.67) we have reached max
-            double steeringProportion = leftCurrentRotations / rightCurrentRotations;
-            telemetry.addData("Steering Prop", steeringProportion);
-            telemetry.update();
-
-            steeringProportion = Math.min(1.5,steeringProportion);
-            steeringProportion = Math.max(0.67,steeringProportion);
-
-            if (getUltrasonicDistance() <= distance) {
-                break;
-            }
-
-            robot.leftMotor.setPower(leftMidPower*(1/steeringProportion)*leftPolarity);
-            robot.rightMotor.setPower(rightMidPower*steeringProportion*rightPolarity);
-        }
-        robot.leftMotor.setPower(0);
-        robot.rightMotor.setPower(0);
-    }
-
-    public void DriveLine2(double speed, int heading, int distance)
-    {
-        robot.leftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        robot.rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        double leftMinimumPower = 0.28;
-        double rightMinimumPower = 0.2;
-        double leftMaxPower = 0.7;
-        double rightMaxPower = 0.7;
-        double leftMidPower = (leftMinimumPower+leftMaxPower)/2;
-        double rightMidPower = (rightMinimumPower+rightMaxPower)/2;
-        double leftDelta = leftMidPower-leftMinimumPower;
-        double rightDelta = rightMidPower-rightMinimumPower;
-
-        while(opModeIsActive())
-        {
-            int leftCurrentTicks = Math.abs(robot.leftMotor.getCurrentPosition());
-            int rightCurrentTicks = Math.abs(robot.rightMotor.getCurrentPosition());
-
-            double leftCurrentRotations = ((double)leftCurrentTicks)/leftTicksPerRotation;
-            double rightCurrentRotations = ((double)rightCurrentTicks)/rightTicksPerRotation;
-
-            telemetry.addData("Left Rotations", leftCurrentRotations);
-            telemetry.addData("Right Rotations", rightCurrentRotations);
-            telemetry.update();
-
-            // steeringProportion is a ration between the left rotations divided by right rotations
-            // 1 means we are going straight
-            // <1 means left is going too slow or right is going too fast
-            // >1 means right is going too slow or left is going too fast
-            // if steering proportion is above 1.5 (or below 0.67) we have reached max
-            double steeringProportion = leftCurrentRotations / rightCurrentRotations;
-            telemetry.addData("Steering Prop", steeringProportion);
-            telemetry.update();
-
-            if (steeringProportion > 1.5) {
-                steeringProportion = 1.5;
-            } else if (steeringProportion < 0.67) {
-                steeringProportion = 0.67;
-            }
-            if (getGroundColor() > 13) {
-                break;
-            }
-
-            robot.leftMotor.setPower(leftMidPower*(1/steeringProportion)*leftPolarity);
-            robot.rightMotor.setPower(rightMidPower*steeringProportion*rightPolarity);
-        }
-        robot.leftMotor.setPower(0);
-        robot.rightMotor.setPower(0);
     }
 }

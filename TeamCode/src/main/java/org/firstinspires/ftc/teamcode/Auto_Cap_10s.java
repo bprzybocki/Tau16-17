@@ -6,6 +6,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.I2cDevice;
@@ -13,6 +14,7 @@ import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 @Autonomous(name = "Auto Cap 10s", group = "Tau")
+@Disabled
 public class Auto_Cap_10s extends LinearOpMode{
     /* Declare OpMode members. */
     Hardware robot = new Hardware();
@@ -85,25 +87,29 @@ public class Auto_Cap_10s extends LinearOpMode{
         //ModernRoboticsI2cGyro allows us to .getIntegratedZValue()
         waitForStart();
 
-        sleepTau(20000);
+        sleepTau(5000);
 
-        DriveStraightBackwards(POWER,1.1,0);
+        FlywheelsOn();
+
+        sleepTau(5000);
+
+        DriveStraightBackwards(POWER,0.9,0);
 
         sleepTau(INTERIM_TIME);
 
         DoubleShoot();
 
-        sleepTau(INTERIM_TIME);
+        sleepTau(1500);
 
-        TurnToAbsolute(-180);
+        FlywheelsOff();
 
-        sleepTau(INTERIM_TIME);
+        sleepTau(INTERIM_TIME*2);
 
-        DriveStraightAbsolute(POWER,1.5,0);
+        DriveStraightBackwards(POWER,1.5,0);
 
         PistonStow();
 
-        //DriveStraightAbsolute(0.4,2.5,0);
+        sleepTau(1500); // Stops program from terminating to allow piston to stow
     }
 
     //
@@ -119,9 +125,9 @@ public class Auto_Cap_10s extends LinearOpMode{
         robot.leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         robot.rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        int TICKS_PER_TILE = 1900;           // number of encoder ticks per tile
+        int TICKS_PER_TILE = 2000;           // number of encoder ticks per tile
         double ERROR_ADJUSTMENT = 0.035;     // motor power adjustment per degree off of straight
-        int LEFT_POLARITY = -1;     // encoder for the REV motors goes negative when moving forward
+        int LEFT_POLARITY = 1;     // encoder for the REV motors goes negative when moving forward
         //    may need to set to 1 for a different motor/encoder to keep
         //    the encoder values always positive for a forward move
 
@@ -171,12 +177,15 @@ public class Auto_Cap_10s extends LinearOpMode{
         int heading = getHeading();  //Set variables to gyro readings
         //double SPD_ADJUSTMENT = 0.006;
         int diff = Math.abs(heading - target);
-        int THRESHOLD = 20;
+        int THRESHOLD = 30;
+
+        if (Math.abs(target) == 30)
+            THRESHOLD = 20;
 
         while (diff > THRESHOLD && opModeIsActive()) {  //Continue while the robot direction is further than three degrees from the target
             if (heading > target) {  //if gyro is positive, we will turn right
-                robot.leftMotor.setPower(0.4);
-                robot.rightMotor.setPower(-0.4); //clockwise (slower, needs higher power)
+                robot.leftMotor.setPower(0.42);
+                robot.rightMotor.setPower(-0.42); //clockwise (slower, needs higher power)
             }
 
             if (heading < target) {  //if gyro is positive, we will turn left
@@ -245,7 +254,7 @@ public class Auto_Cap_10s extends LinearOpMode{
         robot.flyWheelPiston.setPosition(robot.PISTON_UP);
         sleepTau(1000);
         robot.flyWheelPiston.setPosition(robot.PISTON_DOWN);
-        sleepTau(1000);
+        sleepTau(5000);
         robot.flyWheelPiston.setPosition(robot.PISTON_UP);
     }
 
@@ -278,7 +287,7 @@ public class Auto_Cap_10s extends LinearOpMode{
 
         boolean foundLine = false;
         double ERROR_ADJUSTMENT = 0.035;     // motor power adjustment per degree off of straight
-        int LEFT_POLARITY = -1;     // encoder for the REV motors goes negative when moving forward
+        int LEFT_POLARITY = 1;     // encoder for the REV motors goes negative when moving forward
         //    may need to set to 1 for a different motor/encoder to keep
         //    the encoder values always positive for a forward move
 
@@ -314,7 +323,7 @@ public class Auto_Cap_10s extends LinearOpMode{
 
         boolean foundLine = false;
         double ERROR_ADJUSTMENT = 0.035;     // motor power adjustment per degree off of straight
-        int LEFT_POLARITY = -1;     // encoder for the REV motors goes negative when moving forward
+        int LEFT_POLARITY = 1;     // encoder for the REV motors goes negative when moving forward
         //    may need to set to 1 for a different motor/encoder to keep
         //    the encoder values always positive for a forward move
 
@@ -350,9 +359,9 @@ public class Auto_Cap_10s extends LinearOpMode{
         robot.leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         robot.rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        int TICKS_PER_TILE = 1900;           // number of encoder ticks per tile
+        int TICKS_PER_TILE = 2000;           // number of encoder ticks per tile
         double ERROR_ADJUSTMENT = 0.035;     // motor power adjustment per degree off of straight
-        int LEFT_POLARITY = 1;     // encoder for the REV motors goes negative when moving forward
+        int LEFT_POLARITY = -1;     // encoder for the REV motors goes negative when moving forward
         //    may need to set to 1 for a different motor/encoder to keep
         //    the encoder values always positive for a forward move
 
@@ -386,9 +395,9 @@ public class Auto_Cap_10s extends LinearOpMode{
         robot.leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         robot.rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        int TICKS_PER_TILE = 1900;           // number of encoder ticks per tile
+        int TICKS_PER_TILE = 2000;           // number of encoder ticks per tile
         double ERROR_ADJUSTMENT = 0.035;     // motor power adjustment per degree off of straight
-        int LEFT_POLARITY = -1;     // encoder for the REV motors goes negative when moving forward
+        int LEFT_POLARITY = 1;     // encoder for the REV motors goes negative when moving forward
         //    may need to set to 1 for a different motor/encoder to keep
         //    the encoder values always positive for a forward move
 
@@ -423,9 +432,9 @@ public class Auto_Cap_10s extends LinearOpMode{
         robot.leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         robot.rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        int TICKS_PER_TILE = 1900;           // number of encoder ticks per tile
+        int TICKS_PER_TILE = 2000;           // number of encoder ticks per tile
         double ERROR_ADJUSTMENT = 0.035;     // motor power adjustment per degree off of straight
-        int LEFT_POLARITY = -1;     // encoder for the REV motors goes negative when moving forward
+        int LEFT_POLARITY = 1;     // encoder for the REV motors goes negative when moving forward
         //    may need to set to 1 for a different motor/encoder to keep
         //    the encoder values always positive for a forward move
 

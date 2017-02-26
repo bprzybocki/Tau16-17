@@ -56,8 +56,8 @@ public class Hardware {
     //public static final double PISTON_UP = 0.83;
     public static final double PISTON_UP    = 0.2;
     public static final double PISTON_DOWN  = 1;
-    public static final double FLYWHEEL_PWR = -1;
-    public static final double FLYWHEEL_AUTO = -1;
+    public static final double FLYWHEEL_PWR = -0.95;
+    public static final double FLYWHEEL_AUTO = -1.;
     public static final int FLYWHEEL_SPD    = 4000;
     public static final int COLOR_THRESHOLD = 96; //needs testing
     public static final int BLUE = 3;
@@ -93,6 +93,10 @@ public class Hardware {
         flywheelMotorL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         flywheelMotorR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
+        leftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+
         beaconSensor_l = hwMap.i2cDevice.get("beacon_sens_l");
         beaconSensor_r = hwMap.i2cDevice.get("beacon_sens_r");
         groundSensor = hwMap.i2cDevice.get("ground_sens");
@@ -125,8 +129,8 @@ public class Hardware {
 
 
         // Set to REVERSE if using AndyMark motors
-        leftMotor.setDirection(DcMotor.Direction.REVERSE); // Set to REVERSE if using AndyMark motors
-        rightMotor.setDirection(DcMotor.Direction.FORWARD); // Set to FORWARD if using AndyMark motors
+        leftMotor.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
+        rightMotor.setDirection(DcMotor.Direction.REVERSE); // Set to FORWARD if using AndyMark motors
         // Set to FORWARD if using AndyMark motors
         buttonMotor.setDirection(DcMotor.Direction.FORWARD);
         intakeMotor.setDirection(DcMotor.Direction.FORWARD);
@@ -153,8 +157,8 @@ public class Hardware {
         intakeMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         //intakeMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        flywheelMotorL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        flywheelMotorR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        flywheelMotorL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        flywheelMotorR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         // Define and initialize ALL installed servos.
         flyWheelPiston = hwMap.servo.get("fly_piston");
         flyWheelPiston.setPosition(PISTON_DOWN);
